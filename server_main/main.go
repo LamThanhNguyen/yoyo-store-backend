@@ -11,6 +11,8 @@ import (
 	"time"
 
 	"github.com/LamThanhNguyen/yoyo-store-backend/internal/models"
+	"github.com/LamThanhNguyen/yoyo-store-backend/server_main/api"
+	"github.com/LamThanhNguyen/yoyo-store-backend/server_main/util"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/sync/errgroup"
@@ -26,12 +28,12 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), interruptSignals...)
 	defer stop()
 
-	config, err := LoadConfig(ctx, ".")
+	config, err := util.LoadConfig(ctx, ".")
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot load config")
 	}
 
-	runtimeCfg, err := NewRuntimeConfig(config)
+	runtimeCfg, err := util.NewRuntimeConfig(config)
 	if err != nil {
 		log.Fatal().Err(err).Msg("invalid config values")
 	}
@@ -76,10 +78,10 @@ func runDBMigration(migrationURL string, dbSource string) {
 func runServer(
 	ctx context.Context,
 	waitGroup *errgroup.Group,
-	config RuntimeConfig,
+	config util.RuntimeConfig,
 	db models.DBModel,
 ) {
-	server, err := NewServer(config, db)
+	server, err := api.NewServer(config, db)
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot create server")
 	}
