@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"net/http"
 	"os"
@@ -9,9 +10,8 @@ import (
 	"syscall"
 	"time"
 
-	db "github.com/LamThanhNguyen/yoyo-store-backend/db/sqlc"
+	"github.com/LamThanhNguyen/yoyo-store-backend/internal/models"
 	"github.com/golang-migrate/migrate/v4"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/sync/errgroup"
 )
@@ -38,7 +38,8 @@ func main() {
 
 	log.Info().Interface("config", runtimeCfg).Msg("loaded config")
 
-	connPool, err := pgxpool.New(ctx, runtimeCfg.DBSource)
+	// connPool, err := pgxpool.New(ctx, runtimeCfg.DBSource)
+	connPool, err := sql.Open("pgx", runtimeCfg.DBSource)
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot connect to db")
 	}
@@ -46,11 +47,11 @@ func main() {
 	// Run migration to database
 	runDBMigration(runtimeCfg.MigrationURL, runtimeCfg.DBSource)
 
-	store := db.NewStore(connPool)
+	db_model := models.DBModel{DB: connPool}
 
 	waitGroup, ctx := errgroup.WithContext(ctx)
 
-	runServer(ctx, waitGroup, runtimeCfg, store)
+	runServer(ctx, waitGroup, runtimeCfg, db_model)
 
 	if err = waitGroup.Wait(); err != nil {
 		log.Fatal().Err(err).Msg("err from wait group")
@@ -76,9 +77,9 @@ func runServer(
 	ctx context.Context,
 	waitGroup *errgroup.Group,
 	config RuntimeConfig,
-	store db.Store,
+	db models.DBModel,
 ) {
-	server, err := NewServer(config, store)
+	server, err := NewServer(config, db)
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot create server")
 	}
