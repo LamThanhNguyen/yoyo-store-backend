@@ -3,11 +3,13 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/LamThanhNguyen/yoyo-store-backend/internal/encryption"
 	"github.com/LamThanhNguyen/yoyo-store-backend/internal/models"
 	"github.com/LamThanhNguyen/yoyo-store-backend/internal/urlsigner"
+	"github.com/go-chi/chi/v5"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -198,4 +200,104 @@ func (server *Server) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	resp.Message = "password changed"
 
 	server.writeJSON(w, http.StatusCreated, resp)
+}
+
+// AllUsers returns a JSON file listing all admin users
+func (server *Server) AllUsers(w http.ResponseWriter, r *http.Request) {
+	allUsers, err := server.DB.GetAllUsers()
+	if err != nil {
+		server.badRequest(w, r, err)
+		return
+	}
+
+	server.writeJSON(w, http.StatusOK, allUsers)
+}
+
+// OneUser gets one user by id (from the url) and returns it as JSON
+func (server *Server) OneUser(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	userID, _ := strconv.Atoi(id)
+
+	user, err := server.DB.GetOneUser(userID)
+	if err != nil {
+		server.badRequest(w, r, err)
+		return
+	}
+
+	server.writeJSON(w, http.StatusOK, user)
+}
+
+// EditUser is the handler for adding or editing an existing user
+func (server *Server) EditUser(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	userID, _ := strconv.Atoi(id)
+
+	var user models.User
+
+	err := server.readJSON(w, r, &user)
+	if err != nil {
+		server.badRequest(w, r, err)
+		return
+	}
+
+	if userID > 0 {
+		err = server.DB.EditUser(user)
+		if err != nil {
+			server.badRequest(w, r, err)
+			return
+		}
+
+		if user.Password != "" {
+			newHash, err := bcrypt.GenerateFromPassword([]byte(user.Password), 12)
+			if err != nil {
+				server.badRequest(w, r, err)
+				return
+			}
+
+			err = server.DB.UpdatePasswordForUser(user, string(newHash))
+			if err != nil {
+				server.badRequest(w, r, err)
+				return
+			}
+		}
+	} else {
+		newHash, err := bcrypt.GenerateFromPassword([]byte(user.Password), 12)
+		if err != nil {
+			server.badRequest(w, r, err)
+			return
+		}
+		err = server.DB.AddUser(user, string(newHash))
+		if err != nil {
+			server.badRequest(w, r, err)
+			return
+		}
+	}
+
+	var resp struct {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+
+	resp.Error = false
+	server.writeJSON(w, http.StatusOK, resp)
+}
+
+// DeleteUser deletes a user, and all associated tokens, from the database
+func (server *Server) DeleteUser(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	userID, _ := strconv.Atoi(id)
+
+	err := server.DB.DeleteUser(userID)
+	if err != nil {
+		server.badRequest(w, r, err)
+		return
+	}
+
+	var resp struct {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+
+	resp.Error = false
+	server.writeJSON(w, http.StatusOK, resp)
 }

@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 	"time"
@@ -267,4 +268,91 @@ func (server *Server) VirtualTerminalPaymentSucceeded(w http.ResponseWriter, r *
 	}
 
 	server.writeJSON(w, http.StatusOK, txn)
+}
+
+// RefundCharge accepts a json payload and tries to refund a charge
+func (server *Server) RefundCharge(w http.ResponseWriter, r *http.Request) {
+	var chargeToRefund struct {
+		ID            int    `json:"id"`
+		PaymentIntent string `json:"pi"`
+		Amount        int    `json:"amount"`
+		Currency      string `json:"currency"`
+	}
+
+	err := server.readJSON(w, r, &chargeToRefund)
+	if err != nil {
+		server.badRequest(w, r, err)
+		return
+	}
+
+	card := cards.Card{
+		Secret:   server.config.StripeSecret,
+		Key:      server.config.StripeKey,
+		Currency: chargeToRefund.Currency,
+	}
+
+	err = card.Refund(chargeToRefund.PaymentIntent, chargeToRefund.Amount)
+	if err != nil {
+		server.badRequest(w, r, err)
+		return
+	}
+
+	// update status in db
+	err = server.DB.UpdateOrderStatus(chargeToRefund.ID, 2)
+	if err != nil {
+		server.badRequest(w, r, errors.New("the charge was refunded, but the database could not be updated"))
+		return
+	}
+
+	var resp struct {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+	resp.Error = false
+	resp.Message = "Charge refunded"
+
+	server.writeJSON(w, http.StatusOK, resp)
+}
+
+// CancelSubscription is the handler to cancel a subscription
+func (server *Server) CancelSubscription(w http.ResponseWriter, r *http.Request) {
+	var subToCancel struct {
+		ID            int    `json:"id"`
+		PaymentIntent string `json:"pi"`
+		Currency      string `json:"currency"`
+	}
+
+	err := server.readJSON(w, r, &subToCancel)
+	if err != nil {
+		server.badRequest(w, r, err)
+		return
+	}
+
+	card := cards.Card{
+		Secret:   server.config.StripeSecret,
+		Key:      server.config.StripeKey,
+		Currency: subToCancel.Currency,
+	}
+
+	err = card.CancelSubscription(subToCancel.PaymentIntent)
+	if err != nil {
+		server.badRequest(w, r, err)
+		return
+	}
+
+	// update status in db
+	err = server.DB.UpdateOrderStatus(subToCancel.ID, 3)
+	if err != nil {
+		server.badRequest(w, r, errors.New("the subscription was cancelled, but the database could not be updated"))
+		return
+	}
+
+	var resp struct {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+	resp.Error = false
+	resp.Message = "Subscription cancelled"
+
+	server.writeJSON(w, http.StatusOK, resp)
 }

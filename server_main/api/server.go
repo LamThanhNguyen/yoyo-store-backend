@@ -56,10 +56,19 @@ func (server *Server) SetupRouter() {
 		mux.Use(server.Auth)
 
 		mux.Post("/virtual-terminal-succeeded", server.VirtualTerminalPaymentSucceeded)
-		mux.Post("/all-sales", server.AllSales)
-		mux.Post("/all-subscriptions", server.AllSubscriptions)
+		mux.Get("/all-sales", server.AllSales)
+		mux.Get("/all-subscriptions", server.AllSubscriptions)
 
-		mux.Post("/get-sale/{id}", server.GetSale)
+		mux.Get("/get-sale/{id}", server.GetSale)
+
+		mux.Post("/refund", server.RefundCharge)
+		mux.Post("/cancel-subscription", server.CancelSubscription)
+
+		mux.Get("/all-users", server.AllUsers)
+		mux.Get("/all-users/{id}", server.OneUser)
+		mux.Patch("/all-users/edit/{id}", server.EditUser)
+
+		mux.Delete("/all-users/delete/{id}", server.DeleteUser)
 	})
 
 	server.router = mux
