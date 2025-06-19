@@ -2,12 +2,17 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
+	"io"
+	"maps"
 	"net/http"
+	"strings"
 
 	"github.com/LamThanhNguyen/yoyo-store-backend/internal/models"
 	"github.com/LamThanhNguyen/yoyo-store-backend/server_main/util"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Server struct {
@@ -42,6 +47,16 @@ func (server *Server) SetupRouter() {
 	mux.Get("/api/v1/items/{id}", server.GetItemByID)
 	mux.Post("/api/create-customer-and-subscribe-to-plan", server.CreateCustomerAndSubscribeToPlan)
 
+	mux.Post("/api/authenticate", server.CreateAuthToken)
+	mux.Post("/api/is-authenticated", server.CheckAuthentication)
+	mux.Post("/api/forgot-password", server.SendPasswordResetEmail)
+	mux.Post("/api/reset-password", server.ResetPassword)
+
+	mux.Route("/api/admin", func(mux chi.Router) {
+		mux.Use(server.Auth)
+
+	})
+
 	server.router = mux
 }
 
@@ -69,15 +84,61 @@ func (server *Server) writeJSON(
 	}
 
 	if len(headers) > 0 {
-		for k, v := range headers[0] {
-			w.Header()[k] = v
-		}
+		maps.Copy(w.Header(), headers[0])
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	w.Write(out)
 
+	return nil
+}
+
+// readJSON reads json from request body into data. We only accept a single json value in the body
+func (server *Server) readJSON(
+	w http.ResponseWriter,
+	r *http.Request,
+	data interface{}) error {
+	maxBytes := 1048576 // max one megabyte in request body
+	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
+
+	dec := json.NewDecoder(r.Body)
+	err := dec.Decode(data)
+	if err != nil {
+		return err
+	}
+
+	// we only allow one entry in the json file
+	err = dec.Decode(&struct{}{})
+	if err != io.EOF {
+		return errors.New("body must only have a single JSON value")
+	}
+
+	return nil
+}
+
+// badRequest sends a JSON response with status http.StatusBadRequest, describing the error
+func (server *Server) badRequest(
+	w http.ResponseWriter,
+	_ *http.Request,
+	err error,
+) error {
+	var payload struct {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+
+	payload.Error = true
+	payload.Message = err.Error()
+
+	out, err := json.MarshalIndent(payload, "", "\t")
+	if err != nil {
+		return err
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusBadRequest)
+	w.Write(out)
 	return nil
 }
 
@@ -96,4 +157,60 @@ func (server *Server) failedValidation(
 	payload.Message = "failed validation"
 	payload.Errors = errors
 	server.writeJSON(w, http.StatusUnprocessableEntity, payload)
+}
+
+func (server *Server) invalidCredentials(w http.ResponseWriter) error {
+	var payload struct {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+
+	payload.Error = true
+	payload.Message = "invalid authentication credentials"
+
+	err := server.writeJSON(w, http.StatusUnauthorized, payload)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (server *Server) passwordMatches(hash, password string) (bool, error) {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	if err != nil {
+		switch {
+		case errors.Is(err, bcrypt.ErrMismatchedHashAndPassword):
+			return false, nil
+		default:
+			return false, err
+		}
+	}
+
+	return true, nil
+}
+
+// authenticateToken checks an auth token for validity
+func (server *Server) authenticateToken(r *http.Request) (*models.User, error) {
+	authorizationHeader := r.Header.Get("Authorization")
+	if authorizationHeader == "" {
+		return nil, errors.New("no authorization header received")
+	}
+
+	headerParts := strings.Split(authorizationHeader, " ")
+	if len(headerParts) != 2 || headerParts[0] != "Bearer" {
+		return nil, errors.New("no authorization header received")
+	}
+
+	token := headerParts[1]
+	if len(token) != 26 {
+		return nil, errors.New("authentication token wrong size")
+	}
+
+	// get the user from the tokens table
+	user, err := server.DB.GetUserForToken(token)
+	if err != nil {
+		return nil, errors.New("no matching user found")
+	}
+
+	return user, nil
 }

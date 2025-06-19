@@ -26,7 +26,7 @@ type Config struct {
 	AccessTokenDuration  string   `mapstructure:"ACCESS_TOKEN_DURATION" json:"ACCESS_TOKEN_DURATION"`
 	RefreshTokenDuration string   `mapstructure:"REFRESH_TOKEN_DURATION" json:"REFRESH_TOKEN_DURATION"`
 	SmtpHost             string   `mapstructure:"SMTP_HOST" json:"SMTP_HOST"`
-	SmtpPort             string   `mapstructure:"SMTP_PORT" json:"SMTP_PORT"`
+	SmtpPort             int      `mapstructure:"SMTP_PORT" json:"SMTP_PORT"`
 	SmtpUsername         string   `mapstructure:"SMTP_USERNAME" json:"SMTP_USERNAME"`
 	SmtpPassword         string   `mapstructure:"SMTP_PASSWORD" json:"SMTP_PASSWORD"`
 	FrontendDomain       string   `mapstructure:"FRONTEND_DOMAIN" json:"FRONTEND_DOMAIN"`
