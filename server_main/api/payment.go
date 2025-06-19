@@ -204,3 +204,67 @@ func (server *Server) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, r 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(out)
 }
+
+// VirtualTerminalPaymentSucceeded displays a page with receipt information
+func (server *Server) VirtualTerminalPaymentSucceeded(w http.ResponseWriter, r *http.Request) {
+	var txnData struct {
+		PaymentAmount   int    `json:"amount"`
+		PaymentCurrency string `json:"currency"`
+		FirstName       string `json:"first_name"`
+		LastName        string `json:"last_name"`
+		Email           string `json:"email"`
+		PaymentIntent   string `json:"payment_intent"`
+		PaymentMethod   string `json:"payment_method"`
+		BankReturnCode  string `json:"bank_return_code"`
+		ExpiryMonth     int    `json:"expiry_month"`
+		ExpiryYear      int    `json:"expiry_year"`
+		LastFour        string `json:"last_four"`
+	}
+
+	err := server.readJSON(w, r, &txnData)
+	if err != nil {
+		server.badRequest(w, r, err)
+		return
+	}
+
+	card := cards.Card{
+		Secret: server.config.StripeSecret,
+		Key:    server.config.StripeKey,
+	}
+
+	pi, err := card.RetrievePaymentIntent(txnData.PaymentIntent)
+	if err != nil {
+		server.badRequest(w, r, err)
+		return
+	}
+
+	pm, err := card.GetPaymentMethod(txnData.PaymentMethod)
+	if err != nil {
+		server.badRequest(w, r, err)
+		return
+	}
+
+	txnData.LastFour = pm.Card.Last4
+	txnData.ExpiryMonth = int(pm.Card.ExpMonth)
+	txnData.ExpiryYear = int(pm.Card.ExpYear)
+
+	txn := models.Transaction{
+		Amount:              txnData.PaymentAmount,
+		Currency:            txnData.PaymentCurrency,
+		LastFour:            txnData.LastFour,
+		ExpiryMonth:         txnData.ExpiryMonth,
+		ExpiryYear:          txnData.ExpiryYear,
+		PaymentIntent:       txnData.PaymentIntent,
+		PaymentMethod:       txnData.PaymentMethod,
+		BankReturnCode:      pi.LatestCharge.ID,
+		TransactionStatusID: 2,
+	}
+
+	_, err = server.SaveTransaction(txn)
+	if err != nil {
+		server.badRequest(w, r, err)
+		return
+	}
+
+	server.writeJSON(w, http.StatusOK, txn)
+}

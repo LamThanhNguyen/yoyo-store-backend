@@ -1,6 +1,6 @@
 ALTER TABLE items
     ADD COLUMN image VARCHAR DEFAULT '',
-    ADD COLUMN is_recurring BOOLEAN DEFAULT true,
+    ADD COLUMN is_recurring BOOLEAN DEFAULT false,
     ADD COLUMN plan_id VARCHAR DEFAULT '';
 
 ALTER TABLE transactions

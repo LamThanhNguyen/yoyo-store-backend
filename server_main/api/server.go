@@ -55,6 +55,11 @@ func (server *Server) SetupRouter() {
 	mux.Route("/api/admin", func(mux chi.Router) {
 		mux.Use(server.Auth)
 
+		mux.Post("/virtual-terminal-succeeded", server.VirtualTerminalPaymentSucceeded)
+		mux.Post("/all-sales", server.AllSales)
+		mux.Post("/all-subscriptions", server.AllSubscriptions)
+
+		mux.Post("/get-sale/{id}", server.GetSale)
 	})
 
 	server.router = mux
