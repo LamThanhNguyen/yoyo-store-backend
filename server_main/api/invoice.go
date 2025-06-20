@@ -1,16 +1,19 @@
 package api
 
 import (
-	"bytes"
-	"encoding/json"
-	"net/http"
+	"context"
 	"time"
+
+	"github.com/LamThanhNguyen/yoyo-store-backend/internal/pb"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // Invoice describes the JSON payload sent to the microservice
 type Invoice struct {
 	ID        int       `json:"id"`
-	WidgetID  int       `json:"widget_id"`
+	ItemID    int       `json:"item_id"`
 	Amount    int       `json:"amount"`
 	Product   string    `json:"product"`
 	Quantity  int       `json:"quantity"`
@@ -22,24 +25,33 @@ type Invoice struct {
 
 // callInvoiceMicro calls the invoicing microservice
 func (server *Server) callInvoiceMicro(inv Invoice) error {
-	url := "http://localhost:5000/invoice/create-and-send"
-	out, err := json.MarshalIndent(inv, "", "\t")
+	_, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	clientConn, err := grpc.NewClient(
+		server.config.InvoiceGrpcAddr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 	if err != nil {
 		return err
 	}
+	defer clientConn.Close()
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(out))
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Content-Type", "application/json")
+	client := pb.NewInvoiceServiceClient(clientConn)
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
+	// Separate context for the actual request (best practice)
+	reqCtx, reqCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer reqCancel()
 
-	return nil
+	_, err = client.CreateAndSendInvoice(reqCtx, &pb.CreateInvoiceRequest{
+		Id:        int32(inv.ID),
+		Quantity:  int32(inv.Quantity),
+		Amount:    int32(inv.Amount),
+		Product:   inv.Product,
+		FirstName: inv.FirstName,
+		LastName:  inv.LastName,
+		Email:     inv.Email,
+		CreatedAt: timestamppb.New(inv.CreatedAt),
+	})
+	return err
 }

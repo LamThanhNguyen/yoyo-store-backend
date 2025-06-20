@@ -1,0 +1,25 @@
+syntax = "proto3";
+package invoice;
+
+option go_package = "github.com/LamThanhNguyen/yoyo-store-backend/internal/pb";
+import "google/protobuf/timestamp.proto";
+
+message CreateInvoiceRequest {
+    int32 id = 1;
+    int32 item_id = 2;
+    int32 amount = 3;
+    string product = 4;
+    int32 quantity = 5;
+    string first_name = 6;
+    string last_name = 7;
+    string email = 8;
+    google.protobuf.Timestamp created_at = 9;
+}
+
+message CreateInvoiceResponse {
+  string message = 1;
+}
+
+service InvoiceService {
+  rpc CreateAndSendInvoice(CreateInvoiceRequest) returns (CreateInvoiceResponse);
+}

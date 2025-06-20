@@ -3,16 +3,18 @@ package main
 import (
 	"context"
 	"errors"
-	"net/http"
+	"net"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	"github.com/LamThanhNguyen/yoyo-store-backend/internal/pb"
 	"github.com/LamThanhNguyen/yoyo-store-backend/server_invoice/api"
 	"github.com/LamThanhNguyen/yoyo-store-backend/server_invoice/util"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/sync/errgroup"
+	"google.golang.org/grpc"
 )
 
 var interruptSignals = []os.Signal{
@@ -53,25 +55,21 @@ func runServer(
 		log.Fatal().Err(err).Msg("cannot create server")
 	}
 
-	server.SetupRouter() // initialize routes
-
 	server.CreateDirIfNotExist("./invoices")
 
-	// Setup HTTP server
-	httpServer := &http.Server{
-		Addr:              config.InvoicePort,
-		Handler:           server.Router(), // use the Gin router
-		IdleTimeout:       30 * time.Second,
-		ReadTimeout:       10 * time.Second,
-		ReadHeaderTimeout: 5 * time.Second,
-		WriteTimeout:      5 * time.Second,
+	grpcServer := grpc.NewServer()
+	pb.RegisterInvoiceServiceServer(grpcServer, api.NewGRPCServer(server))
+
+	lis, err := net.Listen("tcp", config.InvoiceGrpcPort)
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to listen")
 	}
 
-	// Start HTTP server in goroutine
+	// Start gRPC server in goroutine
 	waitGroup.Go(func() error {
-		log.Info().Msgf("start HTTP server at %s", httpServer.Addr)
-		if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Error().Err(err).Msg("HTTP server failed to serve")
+		log.Info().Msgf("start gRPC server at %s", lis.Addr())
+		if err := grpcServer.Serve(lis); err != nil && !errors.Is(err, grpc.ErrServerStopped) {
+			log.Error().Err(err).Msg("gRPC server failed to serve")
 			return err
 		}
 		return nil
@@ -80,17 +78,21 @@ func runServer(
 	// Graceful shutdown on context cancel
 	waitGroup.Go(func() error {
 		<-ctx.Done()
-		log.Info().Msg("graceful shutdown HTTP server")
+		log.Info().Msg("graceful shutdown gRPC server")
 
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
+		done := make(chan struct{})
+		go func() {
+			grpcServer.GracefulStop()
+			close(done)
+		}()
 
-		if err := httpServer.Shutdown(shutdownCtx); err != nil {
-			log.Error().Err(err).Msg("failed to shutdown HTTP server")
-			return err
+		select {
+		case <-done:
+		case <-time.After(5 * time.Second):
+			grpcServer.Stop()
 		}
 
-		log.Info().Msg("HTTP server is stopped")
+		log.Info().Msg("gRPC server is stopped")
 		return nil
 	})
 }

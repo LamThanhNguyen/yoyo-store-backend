@@ -99,4 +99,10 @@ stop_back:
 	@-pkill -SIGTERM -f "gostripe_api -port=${API_PORT}"
 	@echo "Stopped back end"
 
-.PHONY: network postgres createdb dropdb migrateup migrateup1 migratedown migratedown1 new_migration build clean build_back build_invoice build_front start start_back start_invoice start_front stop stop_front stop_invoice stop_back
+proto:
+	rm -f internal/pb/*.go
+	protoc --proto_path=internal/proto --go_out=internal/pb --go_opt=paths=source_relative \
+	--go-grpc_out=internal/pb --go-grpc_opt=paths=source_relative \
+	internal/proto/*.proto
+
+.PHONY: network postgres createdb dropdb migrateup migrateup1 migratedown migratedown1 new_migration build clean build_back build_invoice build_front start start_back start_invoice start_front stop stop_front stop_invoice stop_back proto
