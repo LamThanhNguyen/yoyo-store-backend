@@ -31,6 +31,34 @@ func (server *Server) CreateAndSendInvoice(w http.ResponseWriter, r *http.Reques
 		server.badRequest(w, r, err)
 		return
 	}
+
+	// generate a pdf invoice
+	err = server.createInvoicePDF(order)
+	if err != nil {
+		server.badRequest(w, r, err)
+		return
+	}
+
+	// create mail attachment
+	attachments := []string{
+		fmt.Sprintf("./invoices/%d.pdf", order.ID),
+	}
+
+	// send mail with attachment
+	err = server.SendMail("info@yoyo.com", order.Email, "Your invoice", "invoice", attachments, nil)
+	if err != nil {
+		server.badRequest(w, r, err)
+		return
+	}
+
+	// send reponse
+	var resp struct {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+	resp.Error = false
+	resp.Message = fmt.Sprintf("Invoice %d.pdf created and sent to %s", order.ID, order.Email)
+	server.writeJSON(w, http.StatusCreated, resp)
 }
 
 // createInvoicePDF generates a PDF version of the invoice

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"maps"
 	"net/http"
 	"os"
 
@@ -45,6 +46,29 @@ func (server *Server) SetupRouter() {
 
 func (server *Server) Router() http.Handler {
 	return server.router
+}
+
+// writeJSON writes aribtrary data out as JSON
+func (server *Server) writeJSON(
+	w http.ResponseWriter,
+	status int,
+	data interface{},
+	headers ...http.Header,
+) error {
+	out, err := json.MarshalIndent(data, "", "\t")
+	if err != nil {
+		return err
+	}
+
+	if len(headers) > 0 {
+		maps.Copy(w.Header(), headers[0])
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	w.Write(out)
+
+	return nil
 }
 
 // readJSON reads json from request body into data. We only accept a single json value in the body
