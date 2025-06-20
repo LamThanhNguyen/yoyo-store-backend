@@ -20,8 +20,7 @@ type Config struct {
 	AllowedOrigins       []string `mapstructure:"ALLOWED_ORIGINS" json:"ALLOWED_ORIGINS"`
 	DBSource             string   `mapstructure:"DB_SOURCE" json:"DB_SOURCE"`
 	MigrationURL         string   `mapstructure:"MIGRATION_URL" json:"MIGRATION_URL"`
-	GoStripePort         string   `mapstructure:"GOSTRIPE_PORT" json:"GOSTRIPE_PORT"`
-	ApiPort              string   `mapstructure:"API_PORT" json:"API_PORT"`
+	MainServerPort       string   `mapstructure:"MAIN_SERVER_PORT" json:"MAIN_SERVER_PORT"`
 	TokenSymmetricKey    string   `mapstructure:"TOKEN_SYMMETRIC_KEY" json:"TOKEN_SYMMETRIC_KEY"`
 	AccessTokenDuration  string   `mapstructure:"ACCESS_TOKEN_DURATION" json:"ACCESS_TOKEN_DURATION"`
 	RefreshTokenDuration string   `mapstructure:"REFRESH_TOKEN_DURATION" json:"REFRESH_TOKEN_DURATION"`

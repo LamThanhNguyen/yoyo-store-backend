@@ -41,7 +41,7 @@ clean:
 ## build_back: builds the back end
 build_back:
 	@echo "Building back end..."
-	@go build -o dist/gostripe_api ./cmd/api
+	@go build -o dist/server_main ./cmd/server_main
 	@echo "Back end built!"
 
 ## build_invoice: builds the invoice microservice

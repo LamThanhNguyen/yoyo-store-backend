@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"net/http"
 	"os"
@@ -10,10 +9,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/LamThanhNguyen/yoyo-store-backend/internal/models"
-	"github.com/LamThanhNguyen/yoyo-store-backend/server_main/api"
-	"github.com/LamThanhNguyen/yoyo-store-backend/server_main/util"
-	"github.com/golang-migrate/migrate/v4"
+	"github.com/LamThanhNguyen/yoyo-store-backend/server_invoice/api"
+	"github.com/LamThanhNguyen/yoyo-store-backend/server_invoice/util"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/sync/errgroup"
 )
@@ -33,27 +30,11 @@ func main() {
 		log.Fatal().Err(err).Msg("cannot load config")
 	}
 
-	runtimeCfg, err := util.NewRuntimeConfig(config)
-	if err != nil {
-		log.Fatal().Err(err).Msg("invalid config values")
-	}
-
-	log.Info().Interface("config", runtimeCfg).Msg("loaded config")
-
-	// connPool, err := pgxpool.New(ctx, runtimeCfg.DBSource)
-	connPool, err := sql.Open("pgx", runtimeCfg.DBSource)
-	if err != nil {
-		log.Fatal().Err(err).Msg("cannot connect to db")
-	}
-
-	// Run migration to database
-	runDBMigration(runtimeCfg.MigrationURL, runtimeCfg.DBSource)
-
-	db_model := models.DBModel{DB: connPool}
+	log.Info().Interface("config", config).Msg("loaded config")
 
 	waitGroup, ctx := errgroup.WithContext(ctx)
 
-	runServer(ctx, waitGroup, runtimeCfg, db_model)
+	runServer(ctx, waitGroup, config)
 
 	if err = waitGroup.Wait(); err != nil {
 		log.Fatal().Err(err).Msg("err from wait group")
@@ -62,35 +43,23 @@ func main() {
 	log.Info().Msg("application shutdown complete")
 }
 
-func runDBMigration(migrationURL string, dbSource string) {
-	migration, err := migrate.New(migrationURL, dbSource)
-	if err != nil {
-		log.Fatal().Err(err).Msg("cannot create new migrate instance")
-	}
-
-	if err = migration.Up(); err != nil && err != migrate.ErrNoChange {
-		log.Fatal().Err(err).Msg("failed to run migrate up")
-	}
-
-	log.Info().Msg("db migrated successfully")
-}
-
 func runServer(
 	ctx context.Context,
 	waitGroup *errgroup.Group,
-	config util.RuntimeConfig,
-	db models.DBModel,
+	config util.Config,
 ) {
-	server, err := api.NewServer(config, db)
+	server, err := api.NewServer(config)
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot create server")
 	}
 
 	server.SetupRouter() // initialize routes
 
+	server.CreateDirIfNotExist("./invoices")
+
 	// Setup HTTP server
 	httpServer := &http.Server{
-		Addr:              config.MainServerPort,
+		Addr:              config.InvoicePort,
 		Handler:           server.Router(), // use the Gin router
 		IdleTimeout:       30 * time.Second,
 		ReadTimeout:       10 * time.Second,
