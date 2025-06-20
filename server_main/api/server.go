@@ -112,7 +112,8 @@ func (server *Server) writeJSON(
 func (server *Server) readJSON(
 	w http.ResponseWriter,
 	r *http.Request,
-	data interface{}) error {
+	data interface{},
+) error {
 	maxBytes := 1048576 // max one megabyte in request body
 	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
 

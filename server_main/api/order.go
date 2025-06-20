@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -19,18 +20,29 @@ func (server *Server) SaveOrder(order models.Order) (int, error) {
 
 // AllSales returns all sales as a slice
 func (server *Server) AllSales(w http.ResponseWriter, r *http.Request) {
-	var payload struct {
-		PageSize    int `json:"page_size"`
-		CurrentPage int `json:"page"`
+	pageSize := 10   // default
+	currentPage := 1 // default
+
+	// Parse query params
+	if val := r.URL.Query().Get("page_size"); val != "" {
+		if ps, err := strconv.Atoi(val); err == nil && ps > 0 {
+			pageSize = ps
+		} else {
+			server.badRequest(w, r, errors.New("invalid page_size"))
+			return
+		}
+	}
+	// Parse query params
+	if val := r.URL.Query().Get("page"); val != "" {
+		if cp, err := strconv.Atoi(val); err == nil && cp > 0 {
+			currentPage = cp
+		} else {
+			server.badRequest(w, r, errors.New("invalid page"))
+			return
+		}
 	}
 
-	err := server.readJSON(w, r, &payload)
-	if err != nil {
-		server.badRequest(w, r, err)
-		return
-	}
-
-	allSales, lastPage, totalRecords, err := server.DB.GetAllOrdersPaginated(payload.PageSize, payload.CurrentPage)
+	allSales, lastPage, totalRecords, err := server.DB.GetAllOrdersPaginated(pageSize, currentPage)
 	if err != nil {
 		server.badRequest(w, r, err)
 		return
@@ -44,8 +56,8 @@ func (server *Server) AllSales(w http.ResponseWriter, r *http.Request) {
 		Orders       []*models.Order `json:"orders"`
 	}
 
-	resp.CurrentPage = payload.CurrentPage
-	resp.PageSize = payload.PageSize
+	resp.CurrentPage = currentPage
+	resp.PageSize = pageSize
 	resp.LastPage = lastPage
 	resp.TotalRecords = totalRecords
 	resp.Orders = allSales
@@ -55,18 +67,29 @@ func (server *Server) AllSales(w http.ResponseWriter, r *http.Request) {
 
 // AllSubscriptions returns all subscriptions as a slice
 func (server *Server) AllSubscriptions(w http.ResponseWriter, r *http.Request) {
-	var payload struct {
-		PageSize    int `json:"page_size"`
-		CurrentPage int `json:"page"`
+	pageSize := 10   // default
+	currentPage := 1 // default
+
+	// Parse query params
+	if val := r.URL.Query().Get("page_size"); val != "" {
+		if ps, err := strconv.Atoi(val); err == nil && ps > 0 {
+			pageSize = ps
+		} else {
+			server.badRequest(w, r, errors.New("invalid page_size"))
+			return
+		}
+	}
+	// Parse query params
+	if val := r.URL.Query().Get("page"); val != "" {
+		if cp, err := strconv.Atoi(val); err == nil && cp > 0 {
+			currentPage = cp
+		} else {
+			server.badRequest(w, r, errors.New("invalid page"))
+			return
+		}
 	}
 
-	err := server.readJSON(w, r, &payload)
-	if err != nil {
-		server.badRequest(w, r, err)
-		return
-	}
-
-	allSales, lastPage, totalRecords, err := server.DB.GetAllSubscriptionsPaginated(payload.PageSize, payload.CurrentPage)
+	allSales, lastPage, totalRecords, err := server.DB.GetAllSubscriptionsPaginated(pageSize, currentPage)
 	if err != nil {
 		server.badRequest(w, r, err)
 		return
@@ -80,8 +103,8 @@ func (server *Server) AllSubscriptions(w http.ResponseWriter, r *http.Request) {
 		Orders       []*models.Order `json:"orders"`
 	}
 
-	resp.CurrentPage = payload.CurrentPage
-	resp.PageSize = payload.PageSize
+	resp.CurrentPage = currentPage
+	resp.PageSize = pageSize
 	resp.LastPage = lastPage
 	resp.TotalRecords = totalRecords
 	resp.Orders = allSales

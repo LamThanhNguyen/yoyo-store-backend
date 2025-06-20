@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -204,13 +205,48 @@ func (server *Server) ResetPassword(w http.ResponseWriter, r *http.Request) {
 
 // AllUsers returns a JSON file listing all admin users
 func (server *Server) AllUsers(w http.ResponseWriter, r *http.Request) {
-	allUsers, err := server.DB.GetAllUsers()
+	pageSize := 10   // default
+	currentPage := 1 // default
+
+	// Parse query params
+	if val := r.URL.Query().Get("page_size"); val != "" {
+		if ps, err := strconv.Atoi(val); err == nil && ps > 0 {
+			pageSize = ps
+		} else {
+			server.badRequest(w, r, errors.New("invalid page_size"))
+			return
+		}
+	}
+	// Parse query params
+	if val := r.URL.Query().Get("page"); val != "" {
+		if cp, err := strconv.Atoi(val); err == nil && cp > 0 {
+			currentPage = cp
+		} else {
+			server.badRequest(w, r, errors.New("invalid page"))
+			return
+		}
+	}
+	allUsers, lastPage, totalRecords, err := server.DB.GetAllUsersPaginated(pageSize, currentPage)
 	if err != nil {
 		server.badRequest(w, r, err)
 		return
 	}
 
-	server.writeJSON(w, http.StatusOK, allUsers)
+	var resp struct {
+		CurrentPage  int            `json:"current_page"`
+		PageSize     int            `json:"page_size"`
+		LastPage     int            `json:"last_page"`
+		TotalRecords int            `json:"total_records"`
+		Users        []*models.User `json:"users"`
+	}
+
+	resp.CurrentPage = currentPage
+	resp.PageSize = pageSize
+	resp.LastPage = lastPage
+	resp.TotalRecords = totalRecords
+	resp.Users = allUsers
+
+	server.writeJSON(w, http.StatusOK, resp)
 }
 
 // OneUser gets one user by id (from the url) and returns it as JSON

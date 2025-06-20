@@ -63,10 +63,12 @@ func (m *DBModel) UpdatePasswordForUser(u User, hash string) error {
 	return nil
 }
 
-// GetAllUsers returns a slice of all users
-func (m *DBModel) GetAllUsers() ([]*User, error) {
+// GetAllUsersPaginated returns a slice of a subset of users
+func (m *DBModel) GetAllUsersPaginated(pageSize, page int) ([]*User, int, int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
+
+	offset := (page - 1) * pageSize
 
 	var users []*User
 
@@ -77,11 +79,12 @@ func (m *DBModel) GetAllUsers() ([]*User, error) {
 			users
 		order by
 			last_name, first_name
+		limit ? offset ?
 	`
 
-	rows, err := m.DB.QueryContext(ctx, query)
+	rows, err := m.DB.QueryContext(ctx, query, pageSize, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, 0, err
 	}
 	defer rows.Close()
 
@@ -96,12 +99,28 @@ func (m *DBModel) GetAllUsers() ([]*User, error) {
 			&u.UpdatedAt,
 		)
 		if err != nil {
-			return nil, err
+			return nil, 0, 0, err
 		}
 		users = append(users, &u)
 	}
 
-	return users, nil
+	query = `
+		select
+			count(id)
+		from
+			users
+	`
+
+	var totalRecords int
+	countRow := m.DB.QueryRowContext(ctx, query)
+	err = countRow.Scan(&totalRecords)
+	if err != nil {
+		return nil, 0, 0, err
+	}
+
+	lastPage := totalRecords / pageSize
+
+	return users, lastPage, totalRecords, nil
 }
 
 // GetOneUser returns one user by id
