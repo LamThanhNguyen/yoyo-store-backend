@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// Widget is the type for all widgets
+// Yoyo is the type for all Yoyo
 type Item struct {
 	ID             int       `json:"id"`
 	Name           string    `json:"name"`
@@ -19,7 +19,7 @@ type Item struct {
 	UpdatedAt      time.Time `json:"-"`
 }
 
-// GetWidget gets one widget by id
+// GetYoyo gets one yoyo by id
 func (m *DBModel) GetItem(id int) (Item, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -31,8 +31,8 @@ func (m *DBModel) GetItem(id int) (Item, error) {
 			id, name, description, inventory_level, price, coalesce(image, ''),
 			is_recurring, plan_id,
 			created_at, updated_at
-		from 
-			widgets 
+		from
+			items
 		where id = ?`, id)
 
 	err := row.Scan(

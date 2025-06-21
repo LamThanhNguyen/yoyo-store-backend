@@ -17,6 +17,7 @@ import (
 	"github.com/LamThanhNguyen/yoyo-store-backend/internal/models"
 	"github.com/alexedwards/scs/postgresstore"
 	"github.com/alexedwards/scs/v2"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/sync/errgroup"
 )

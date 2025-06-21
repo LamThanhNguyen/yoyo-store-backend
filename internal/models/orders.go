@@ -8,7 +8,7 @@ import (
 // Order is the type for all orders
 type Order struct {
 	ID            int         `json:"id"`
-	WidgetID      int         `json:"widget_id"`
+	ItemID        int         `json:"item_id"`
 	TransactionID int         `json:"transaction_id"`
 	CustomerID    int         `json:"customer_id"`
 	StatusID      int         `json:"status_id"`
@@ -28,13 +28,13 @@ func (m *DBModel) InsertOrder(order Order) (int, error) {
 
 	stmt := `
 		insert into orders
-			(widget_id, transaction_id, status_id, quantity, customer_id,
+			(item_id, transaction_id, status_id, quantity, customer_id,
 			amount, created_at, updated_at)
 		values (?, ?, ?, ?, ?, ?, ?, ?)
 	`
 
 	result, err := m.DB.ExecContext(ctx, stmt,
-		order.WidgetID,
+		order.ItemID,
 		order.TransactionID,
 		order.StatusID,
 		order.Quantity,
@@ -66,7 +66,7 @@ func (m *DBModel) GetAllOrdersPaginated(pageSize, page int) ([]*Order, int, int,
 
 	query := `
 	select
-		o.id, o.widget_id, o.transaction_id, o.customer_id, 
+		o.id, o.item_id, o.transaction_id, o.customer_id, 
 		o.status_id, o.quantity, o.amount, o.created_at,
 		o.updated_at, i.id, i.name, t.id, t.amount, t.currency,
 		t.last_four, t.expiry_month, t.expiry_year, t.payment_intent,
@@ -94,7 +94,7 @@ func (m *DBModel) GetAllOrdersPaginated(pageSize, page int) ([]*Order, int, int,
 		var o Order
 		err = rows.Scan(
 			&o.ID,
-			&o.WidgetID,
+			&o.ItemID,
 			&o.TransactionID,
 			&o.CustomerID,
 			&o.StatusID,
@@ -128,7 +128,7 @@ func (m *DBModel) GetAllOrdersPaginated(pageSize, page int) ([]*Order, int, int,
 			count(o.id)
 		from 
 			orders o
-			left join items i on (o.widget_id = i.id)
+			left join items i on (o.item_id = i.id)
 		where
 			i.is_recurring = false
 	`
@@ -156,7 +156,7 @@ func (m *DBModel) GetAllSubscriptionsPaginated(pageSize, page int) ([]*Order, in
 
 	query := `
 	select
-		o.id, o.widget_id, o.transaction_id, o.customer_id, 
+		o.id, o.item_id, o.transaction_id, o.customer_id, 
 		o.status_id, o.quantity, o.amount, o.created_at,
 		o.updated_at, i.id, i.name, t.id, t.amount, t.currency,
 		t.last_four, t.expiry_month, t.expiry_year, t.payment_intent,
@@ -184,7 +184,7 @@ func (m *DBModel) GetAllSubscriptionsPaginated(pageSize, page int) ([]*Order, in
 		var o Order
 		err = rows.Scan(
 			&o.ID,
-			&o.WidgetID,
+			&o.ItemID,
 			&o.TransactionID,
 			&o.CustomerID,
 			&o.StatusID,
@@ -218,7 +218,7 @@ func (m *DBModel) GetAllSubscriptionsPaginated(pageSize, page int) ([]*Order, in
 			count(o.id)
 		from 
 			orders o
-			left join items i on (o.widget_id = i.id)
+			left join items i on (o.item_id = i.id)
 		where
 			i.is_recurring = true
 	`
@@ -251,7 +251,7 @@ func (m *DBModel) GetOrderByID(id int) (Order, error) {
 			t.bank_return_code, c.id, c.first_name, c.last_name, c.email
 		from
 			orders o
-			left join items i on (o.widget_id = i.id)
+			left join items i on (o.item_id = i.id)
 			left join transactions t on (o.transaction_id = t.id)
 			left join customers c on (o.customer_id = c.id)
 		where
@@ -262,7 +262,7 @@ func (m *DBModel) GetOrderByID(id int) (Order, error) {
 
 	err := row.Scan(
 		&o.ID,
-		&o.WidgetID,
+		&o.ItemID,
 		&o.TransactionID,
 		&o.CustomerID,
 		&o.StatusID,

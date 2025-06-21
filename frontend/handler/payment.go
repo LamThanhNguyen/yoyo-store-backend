@@ -10,19 +10,19 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// ChargeOnce displays the page to buy one widget
+// ChargeOnce displays the page to buy one yoyo
 func (server *Server) ChargeOnce(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	itemID, _ := strconv.Atoi(id)
 
-	widget, err := server.DB.GetItem(itemID)
+	yoyo, err := server.DB.GetItem(itemID)
 	if err != nil {
 		log.Error().Err(err)
 		return
 	}
 
 	data := make(map[string]interface{})
-	data["widget"] = widget
+	data["yoyo"] = yoyo
 
 	if err := server.renderTemplate(w, r, "buy-once", &templateData{
 		Data: data,
@@ -65,7 +65,7 @@ func (server *Server) PaymentSucceeded(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// read posted data
-	widgetID, _ := strconv.Atoi(r.Form.Get("product_id"))
+	yoyoID, _ := strconv.Atoi(r.Form.Get("product_id"))
 
 	txnData, err := server.GetTransactionData(r)
 	if err != nil {
@@ -101,7 +101,7 @@ func (server *Server) PaymentSucceeded(w http.ResponseWriter, r *http.Request) {
 
 	// create a new order
 	order := models.Order{
-		WidgetID:      widgetID,
+		ItemID:        yoyoID,
 		TransactionID: txnID,
 		CustomerID:    customerID,
 		StatusID:      1,
@@ -121,7 +121,7 @@ func (server *Server) PaymentSucceeded(w http.ResponseWriter, r *http.Request) {
 	inv := Invoice{
 		ID:        orderID,
 		Amount:    order.Amount,
-		Product:   "Widget",
+		Product:   "Yoyo",
 		Quantity:  order.Quantity,
 		FirstName: txnData.FirstName,
 		LastName:  txnData.LastName,

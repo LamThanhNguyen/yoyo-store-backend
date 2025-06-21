@@ -14,6 +14,9 @@ import (
 	"github.com/LamThanhNguyen/yoyo-store-backend/server_main/api"
 	"github.com/LamThanhNguyen/yoyo-store-backend/server_main/util"
 	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/sync/errgroup"
 )

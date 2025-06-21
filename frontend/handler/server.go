@@ -50,7 +50,7 @@ func (server *Server) SetupRouter() {
 		mux.Get("/all-users/{id}", server.OneUser)
 	})
 
-	mux.Get("/widget/{id}", server.ChargeOnce)
+	mux.Get("/yoyo/{id}", server.ChargeOnce)
 	mux.Post("/payment-succeeded", server.PaymentSucceeded)
 	mux.Get("/receipt", server.Receipt)
 

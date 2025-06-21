@@ -157,7 +157,7 @@ func (server *Server) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, r 
 
 		// create order
 		order := models.Order{
-			WidgetID:      productID,
+			ItemID:        productID,
 			TransactionID: txnID,
 			CustomerID:    customerID,
 			StatusID:      1,
