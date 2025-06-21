@@ -53,7 +53,7 @@ func main() {
 
 	waitGroup, ctx := errgroup.WithContext(ctx)
 
-	runServer(ctx, waitGroup, runtimeCfg, db_model)
+	runServer(ctx, waitGroup, runtimeCfg, db_model, connPool)
 
 	if err = waitGroup.Wait(); err != nil {
 		log.Fatal().Err(err).Msg("err from wait group")
@@ -80,6 +80,7 @@ func runServer(
 	waitGroup *errgroup.Group,
 	config util.RuntimeConfig,
 	db models.DBModel,
+	dbConn *sql.DB,
 ) {
 	server, err := api.NewServer(config, db)
 	if err != nil {
@@ -122,6 +123,16 @@ func runServer(
 		}
 
 		log.Info().Msg("HTTP server is stopped")
+		return nil
+	})
+
+	waitGroup.Go(func() error {
+		<-ctx.Done()
+		log.Info().Msg("Closing DB connection")
+		if err := dbConn.Close(); err != nil {
+			log.Error().Err(err).Msg("failed to close DB connection")
+			return err
+		}
 		return nil
 	})
 }

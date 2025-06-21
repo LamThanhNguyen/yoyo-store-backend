@@ -132,6 +132,10 @@ func runServer(
 	waitGroup.Go(func() error {
 		<-ctx.Done()
 		log.Info().Msg("Closing DB connection")
-		return dbConn.Close()
+		if err := dbConn.Close(); err != nil {
+			log.Error().Err(err).Msg("failed to close DB connection")
+			return err
+		}
+		return nil
 	})
 }
