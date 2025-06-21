@@ -37,3 +37,9 @@ ALTER TABLE orders
   REFERENCES statuses(id)
   ON DELETE CASCADE
   ON UPDATE CASCADE;
+
+INSERT INTO "statuses" ("name")
+VALUES
+  ('Cleared'),
+  ('Refunded'),
+  ('Cancelled');

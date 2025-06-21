@@ -32,3 +32,11 @@ ALTER TABLE transactions
   REFERENCES transaction_statuses(id)
   ON DELETE CASCADE
   ON UPDATE CASCADE;
+
+INSERT INTO "transaction_statuses" ("name")
+VALUES
+  ('Pending'),
+  ('Cleared'),
+  ('Declined'),
+  ('Refunded'),
+  ('Partially refunded');
