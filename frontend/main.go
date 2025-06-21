@@ -63,7 +63,7 @@ func main() {
 
 	waitGroup, ctx := errgroup.WithContext(ctx)
 
-	runServer(ctx, waitGroup, runtimeCfg, tc, db_model, Session)
+	runServer(ctx, waitGroup, runtimeCfg, tc, db_model, Session, connPool)
 
 	if err = waitGroup.Wait(); err != nil {
 		log.Fatal().Err(err).Msg("err from wait group")
@@ -79,6 +79,7 @@ func runServer(
 	templateCache map[string]*template.Template,
 	db models.DBModel,
 	session *scs.SessionManager,
+	dbConn *sql.DB,
 ) {
 	server, err := handler.NewServer(config, templateCache, db, session)
 	if err != nil {
@@ -87,7 +88,10 @@ func runServer(
 
 	server.SetupRouter() // initialize routes
 
-	go server.ListenToWsChannel()
+	waitGroup.Go(func() error {
+		server.ListenToWsChannel(ctx)
+		return nil
+	})
 
 	httpServer := &http.Server{
 		Addr:              config.FrontendPort,
@@ -123,5 +127,11 @@ func runServer(
 
 		log.Info().Msg("HTTP server is stopped")
 		return nil
+	})
+
+	waitGroup.Go(func() error {
+		<-ctx.Done()
+		log.Info().Msg("Closing DB connection")
+		return dbConn.Close()
 	})
 }

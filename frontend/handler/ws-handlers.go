@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -29,19 +30,24 @@ type WsJsonResponse struct {
 
 var clients = make(map[WebSocketConnection]string)
 
-var wsChan = make(chan WsPayload)
+var wsChan = make(chan WsPayload, 8)
 
-func (server *Server) ListenToWsChannel() {
+func (server *Server) ListenToWsChannel(ctx context.Context) {
 	var response WsJsonResponse
 	for {
-		e := <-wsChan
-		switch e.Action {
-		case "deleteUser":
-			response.Action = "logout"
-			response.Message = "Your account has been deleted"
-			response.UserID = e.UserID
-			server.broadcastToAll(response)
-		default:
+		select {
+		case <-ctx.Done():
+			log.Info().Msg("WsChannel stopped")
+			return
+		case e := <-wsChan:
+			switch e.Action {
+			case "deleteUser":
+				response.Action = "logout"
+				response.Message = "Your account has been deleted"
+				response.UserID = e.UserID
+				server.broadcastToAll(response)
+			default:
+			}
 		}
 	}
 }
