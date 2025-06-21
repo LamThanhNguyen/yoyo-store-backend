@@ -137,7 +137,7 @@ func (server *Server) SendPasswordResetEmail(w http.ResponseWriter, r *http.Requ
 	// send mail
 	err = server.SendMail("info@yoyo.com", payload.Email, "Password Reset Request", "password-reset", data)
 	if err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("SendPasswordResetEmail")
 		server.badRequest(w, r, err)
 		return
 	}
@@ -261,6 +261,34 @@ func (server *Server) OneUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	server.writeJSON(w, http.StatusOK, user)
+}
+
+func (server *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
+	var user models.User
+
+	err := server.readJSON(w, r, &user)
+	if err != nil {
+		server.badRequest(w, r, err)
+		return
+	}
+	newHash, err := bcrypt.GenerateFromPassword([]byte(user.Password), 12)
+	if err != nil {
+		server.badRequest(w, r, err)
+		return
+	}
+	err = server.DB.AddUser(user, string(newHash))
+	if err != nil {
+		server.badRequest(w, r, err)
+		return
+	}
+
+	var resp struct {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+
+	resp.Error = false
+	server.writeJSON(w, http.StatusOK, resp)
 }
 
 // EditUser is the handler for adding or editing an existing user

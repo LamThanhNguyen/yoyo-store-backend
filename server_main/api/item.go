@@ -16,13 +16,13 @@ func (server *Server) GetItemByID(w http.ResponseWriter, r *http.Request) {
 
 	item, err := server.DB.GetItem(itemID)
 	if err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("GetItemByID")
 		return
 	}
 
 	out, err := json.MarshalIndent(item, "", "   ")
 	if err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("GetItemByID")
 		return
 	}
 

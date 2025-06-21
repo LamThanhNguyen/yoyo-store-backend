@@ -34,13 +34,13 @@ func (server *Server) GetPaymentIntent(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("GetPaymentIntent")
 		return
 	}
 
 	amount, err := strconv.Atoi(payload.Amount)
 	if err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("GetPaymentIntent")
 	}
 
 	card := cards.Card{
@@ -59,7 +59,7 @@ func (server *Server) GetPaymentIntent(w http.ResponseWriter, r *http.Request) {
 	if okay {
 		out, err := json.MarshalIndent(pi, "", "   ")
 		if err != nil {
-			log.Error().Err(err)
+			log.Error().Err(err).Msg("GetPaymentIntent")
 			return
 		}
 
@@ -74,7 +74,7 @@ func (server *Server) GetPaymentIntent(w http.ResponseWriter, r *http.Request) {
 
 		out, err := json.MarshalIndent(j, "", "   ")
 		if err != nil {
-			log.Error().Err(err)
+			log.Error().Err(err).Msg("GetPaymentIntent")
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -88,7 +88,7 @@ func (server *Server) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, r 
 
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("CreateCustomerAndSubscribeToPlan")
 		return
 	}
 
@@ -113,7 +113,7 @@ func (server *Server) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, r 
 
 	stripeCustomer, msg, err := card.CreateCustomer(data.PaymentMethod, data.Email)
 	if err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("CreateCustomerAndSubscribeToPlan")
 		okay = false
 		txnMsg = msg
 	}
@@ -121,7 +121,7 @@ func (server *Server) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, r 
 	if okay {
 		subscription, err = card.SubscribeToPlan(stripeCustomer, data.Plan, data.Email, data.LastFour, "")
 		if err != nil {
-			log.Error().Err(err)
+			log.Error().Err(err).Msg("CreateCustomerAndSubscribeToPlan")
 			okay = false
 			txnMsg = "Error subscribing customer"
 		}
@@ -131,7 +131,7 @@ func (server *Server) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, r 
 		productID, _ := strconv.Atoi(data.ProductID)
 		customerID, err := server.SaveCustomer(data.FirstName, data.LastName, data.Email)
 		if err != nil {
-			log.Error().Err(err)
+			log.Error().Err(err).Msg("CreateCustomerAndSubscribeToPlan")
 			return
 		}
 
@@ -151,7 +151,7 @@ func (server *Server) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, r 
 
 		txnID, err := server.SaveTransaction(txn)
 		if err != nil {
-			log.Error().Err(err)
+			log.Error().Err(err).Msg("CreateCustomerAndSubscribeToPlan")
 			return
 		}
 
@@ -169,7 +169,7 @@ func (server *Server) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, r 
 
 		orderID, err := server.SaveOrder(order)
 		if err != nil {
-			log.Error().Err(err)
+			log.Error().Err(err).Msg("CreateCustomerAndSubscribeToPlan")
 			return
 		}
 
@@ -186,7 +186,7 @@ func (server *Server) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, r 
 
 		err = server.callInvoiceMicro(inv)
 		if err != nil {
-			log.Error().Err(err)
+			log.Error().Err(err).Msg("CreateCustomerAndSubscribeToPlan")
 			return
 		}
 	}
@@ -198,7 +198,7 @@ func (server *Server) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, r 
 
 	out, err := json.MarshalIndent(resp, "", "  ")
 	if err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("CreateCustomerAndSubscribeToPlan")
 		return
 	}
 

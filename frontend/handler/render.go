@@ -51,7 +51,7 @@ func (server *Server) renderTemplate(w http.ResponseWriter, r *http.Request, pag
 	} else {
 		t, err = server.parseTemplate(partials, page, templateToRender)
 		if err != nil {
-			log.Error().Err(err)
+			log.Error().Err(err).Msg("renderTemplate")
 			return err
 		}
 	}
@@ -64,7 +64,7 @@ func (server *Server) renderTemplate(w http.ResponseWriter, r *http.Request, pag
 
 	err = t.Execute(w, td)
 	if err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("renderTemplate")
 		return err
 	}
 
@@ -88,7 +88,7 @@ func (server *Server) parseTemplate(partials []string, page, templateToRender st
 		t, err = template.New(fmt.Sprintf("%s.page.gohtml", page)).Funcs(functions).ParseFS(templateFS, "templates/base.layout.gohtml", templateToRender)
 	}
 	if err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("parseTemplate")
 		return nil, err
 	}
 

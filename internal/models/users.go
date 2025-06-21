@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -203,6 +204,7 @@ func (m *DBModel) AddUser(u User, hash string) error {
 	)
 
 	if err != nil {
+		log.Error().Err(err).Msg("add user")
 		return err
 	}
 	return nil

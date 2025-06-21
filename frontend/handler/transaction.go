@@ -28,7 +28,7 @@ func (server *Server) GetTransactionData(r *http.Request) (TransactionData, erro
 	var txnData TransactionData
 	err := r.ParseForm()
 	if err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("GetTransactionData")
 		return txnData, err
 	}
 
@@ -48,13 +48,13 @@ func (server *Server) GetTransactionData(r *http.Request) (TransactionData, erro
 
 	pi, err := card.RetrievePaymentIntent(paymentIntent)
 	if err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("GetTransactionData")
 		return txnData, err
 	}
 
 	pm, err := card.GetPaymentMethod(paymentMethod)
 	if err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("GetTransactionData")
 		return txnData, err
 	}
 

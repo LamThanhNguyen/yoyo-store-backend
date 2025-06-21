@@ -32,7 +32,7 @@ func (server *Server) Receipt(w http.ResponseWriter, r *http.Request) {
 	if err := server.renderTemplate(w, r, "receipt", &templateData{
 		Data: data,
 	}); err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("Receipt")
 	}
 }
 

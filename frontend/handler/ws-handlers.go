@@ -73,7 +73,7 @@ var upgradeConnection = websocket.Upgrader{
 func (server *Server) WsEndPoint(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgradeConnection.Upgrade(w, r, nil)
 	if err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("WsEndPoint")
 		return
 	}
 
@@ -83,7 +83,7 @@ func (server *Server) WsEndPoint(w http.ResponseWriter, r *http.Request) {
 
 	err = ws.WriteJSON(response)
 	if err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("WsEndPoint")
 		return
 	}
 

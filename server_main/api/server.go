@@ -46,14 +46,15 @@ func (server *Server) SetupRouter() {
 	mux.Get("/api/v1/health", server.handleHealthCheck)
 	mux.Post("/api/v1/payment-intent", server.GetPaymentIntent)
 	mux.Get("/api/v1/items/{id}", server.GetItemByID)
-	mux.Post("/api/create-customer-and-subscribe-to-plan", server.CreateCustomerAndSubscribeToPlan)
+	mux.Post("/api/v1/create-customer-and-subscribe-to-plan", server.CreateCustomerAndSubscribeToPlan)
 
-	mux.Post("/api/authenticate", server.CreateAuthToken)
-	mux.Post("/api/is-authenticated", server.CheckAuthentication)
-	mux.Post("/api/forgot-password", server.SendPasswordResetEmail)
-	mux.Post("/api/reset-password", server.ResetPassword)
+	mux.Post("/api/v1/authenticate", server.CreateAuthToken)
+	mux.Post("/api/v1/is-authenticated", server.CheckAuthentication)
+	mux.Post("/api/v1/forgot-password", server.SendPasswordResetEmail)
+	mux.Post("/api/v1/reset-password", server.ResetPassword)
+	mux.Post("/api/v1/all-users/create", server.CreateUser)
 
-	mux.Route("/api/admin", func(mux chi.Router) {
+	mux.Route("/api/v1/admin", func(mux chi.Router) {
 		mux.Use(server.Auth)
 
 		mux.Post("/virtual-terminal-succeeded", server.VirtualTerminalPaymentSucceeded)
@@ -68,7 +69,6 @@ func (server *Server) SetupRouter() {
 		mux.Get("/all-users", server.AllUsers)
 		mux.Get("/all-users/{id}", server.OneUser)
 		mux.Patch("/all-users/edit/{id}", server.EditUser)
-
 		mux.Delete("/all-users/delete/{id}", server.DeleteUser)
 	})
 

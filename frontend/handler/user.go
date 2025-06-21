@@ -12,21 +12,21 @@ import (
 // AllUsers shows the all users page
 func (server *Server) AllUsers(w http.ResponseWriter, r *http.Request) {
 	if err := server.renderTemplate(w, r, "all-users", &templateData{}); err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("AllUsers")
 	}
 }
 
 // OneUser shows one admin user for add/edit/delete
 func (server *Server) OneUser(w http.ResponseWriter, r *http.Request) {
 	if err := server.renderTemplate(w, r, "one-user", &templateData{}); err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("OneUser")
 	}
 }
 
 // LoginPage displays the login page
 func (server *Server) LoginPage(w http.ResponseWriter, r *http.Request) {
 	if err := server.renderTemplate(w, r, "login", &templateData{}); err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("LoginPage")
 	}
 }
 
@@ -36,7 +36,7 @@ func (server *Server) PostLoginPage(w http.ResponseWriter, r *http.Request) {
 
 	err := r.ParseForm()
 	if err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("PostLoginPage")
 		return
 	}
 
@@ -64,7 +64,7 @@ func (server *Server) Logout(w http.ResponseWriter, r *http.Request) {
 // ForgotPassword shows the forgot password page
 func (server *Server) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	if err := server.renderTemplate(w, r, "forgot-password", &templateData{}); err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("ForgotPassword")
 	}
 }
 
@@ -108,6 +108,6 @@ func (server *Server) ShowResetPassword(w http.ResponseWriter, r *http.Request) 
 	if err := server.renderTemplate(w, r, "reset-password", &templateData{
 		Data: data,
 	}); err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("ShowResetPassword")
 	}
 }

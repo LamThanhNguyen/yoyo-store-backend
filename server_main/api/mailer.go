@@ -26,13 +26,13 @@ func (server *Server) SendMail(
 
 	t, err := template.New("email-html").ParseFS(emailTemplateFS, templateToRender)
 	if err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("SendMail")
 		return err
 	}
 
 	var tpl bytes.Buffer
 	if err = t.ExecuteTemplate(&tpl, "body", data); err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("SendMail")
 		return err
 	}
 
@@ -41,12 +41,12 @@ func (server *Server) SendMail(
 	templateToRender = fmt.Sprintf("templates/%s.plain.tmpl", tmpl)
 	t, err = template.New("email-plain").ParseFS(emailTemplateFS, templateToRender)
 	if err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("SendMail")
 		return err
 	}
 
 	if err = t.ExecuteTemplate(&tpl, "body", data); err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("SendMail")
 		return err
 	}
 
@@ -78,7 +78,7 @@ func (server *Server) SendMail(
 
 	err = email.Send(smtpClient)
 	if err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("SendMail")
 		return err
 	}
 

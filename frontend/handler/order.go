@@ -19,14 +19,14 @@ func (server *Server) SaveOrder(order models.Order) (int, error) {
 // AllSales shows the all sales page
 func (server *Server) AllSales(w http.ResponseWriter, r *http.Request) {
 	if err := server.renderTemplate(w, r, "all-sales", &templateData{}); err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("AllSales")
 	}
 }
 
 // AllSubscriptions shows all subscription page
 func (server *Server) AllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	if err := server.renderTemplate(w, r, "all-subscriptions", &templateData{}); err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("AllSubscriptions")
 	}
 }
 
@@ -43,7 +43,7 @@ func (server *Server) ShowSale(w http.ResponseWriter, r *http.Request) {
 	if err := server.renderTemplate(w, r, "sale", &templateData{
 		StringMap: stringMap,
 	}); err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("ShowSale")
 	}
 }
 
@@ -60,6 +60,6 @@ func (server *Server) ShowSubscription(w http.ResponseWriter, r *http.Request) {
 	if err := server.renderTemplate(w, r, "sale", &templateData{
 		StringMap: stringMap,
 	}); err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("ShowSubscription")
 	}
 }
