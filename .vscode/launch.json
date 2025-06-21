@@ -1,0 +1,45 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug server_main",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/server_main/main.go",
+            "cwd": "${workspaceFolder}",
+            "envFile": "${workspaceFolder}/.env",
+            "showLog": true         // flip to true only when diagnosing Delve
+        },
+        {
+            "name": "Debug server_invoice",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/server_invoice/main.go",
+            "cwd": "${workspaceFolder}",
+            "envFile": "${workspaceFolder}/.env",
+            "showLog": true         // flip to true only when diagnosing Delve
+        },
+        {
+            "name": "Debug frontend",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/frontend/main.go",
+            "cwd": "${workspaceFolder}",
+            "envFile": "${workspaceFolder}/.env",
+            "showLog": true         // flip to true only when diagnosing Delve
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Debug All Servers",
+            "configurations": [
+                "Debug server_main",
+                "Debug server_invoice",
+                "Debug frontend"
+            ]
+        }
+    ]
+}

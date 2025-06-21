@@ -56,48 +56,57 @@ build_front:
 	@go build -o dist/frontend ./frontend
 	@echo "Front end built!"
 
-## start: starts front and back end
-start: start_back start_invoice start_front
+## start_built: starts front, invoice and back end
+start_built: start_built_back start_built_invoice start_built_front
 
-## start_back: starts the back end
-start_back: build_back
+## start_built_back: starts the back end built
+start_built_back: build_back
 	@echo "Starting the back end..."
 	@./dist/server_main &
 	@echo "Back end running!"
 
-## start_invoice: starts the invoice microservice
-start_invoice: build_invoice
+## start_built_invoice: starts the invoice microservice built
+start_built_invoice: build_invoice
 	@echo "Starting the invoice microservice..."
 	@./dist/server_invoice &
 	@echo "Invoice microservice running!"
 
-## start_front: starts the front end
-start_front: build_front
+## start_built_front: starts the front end built
+start_built_front: build_front
 	@echo "Starting the front end..."
 	@./dist/frontend &
 	@echo "Front end running!"
 
 ## stop: stops the front and back end
-stop: stop_front stop_back stop_invoice
+stop_built: stop_front stop_back stop_invoice
 	@echo "All applications stopped"
 
 ## stop_front: stops the front end
-stop_front:
+stop_built_front:
 	@echo "Stopping the front end..."
 	@-pkill -SIGTERM -f "frontend"
 	@echo "Stopped front end"
 
 ## stop_invoice: stops the invoice microservice
-stop_invoice:
+stop_built_invoice:
 	@echo "Stopping the invoice microservice..."
 	@-pkill -SIGTERM -f "server_invoice"
 	@echo "Stopped invoice microservice"
 
 ## stop_back: stops the back end
-stop_back:
+stop_built_back:
 	@echo "Stopping the back end..."
 	@-pkill -SIGTERM -f "server_main"
 	@echo "Stopped back end"
+
+start_back:
+	@go run server_main/main.go
+
+start_invoice:
+	@go run server_invoice/main.go
+
+start_front:
+	@go run frontend/main.go
 
 proto:
 	rm -f internal/pb/*.go
