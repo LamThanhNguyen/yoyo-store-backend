@@ -41,19 +41,19 @@ clean:
 ## build_back: builds the back end
 build_back:
 	@echo "Building back end..."
-	@go build -o dist/server_main ./cmd/server_main
+	@go build -o dist/server_main ./server_main
 	@echo "Back end built!"
 
 ## build_invoice: builds the invoice microservice
 build_invoice:
 	@echo "Building invoice microservice..."
-	@go build -o dist/invoice ./cmd/micro/invoice
+	@go build -o dist/server_invoice ./server_invoice
 	@echo "Invoice microservice built!"
 
 ## build_front: builds the front end
 build_front:
 	@echo "Building front end..."
-	@go build -o dist/gostripe ./cmd/web
+	@go build -o dist/frontend ./frontend
 	@echo "Front end built!"
 
 ## start: starts front and back end
@@ -62,19 +62,19 @@ start: start_back start_invoice start_front
 ## start_back: starts the back end
 start_back: build_back
 	@echo "Starting the back end..."
-	@env STRIPE_KEY=${STRIPE_KEY} STRIPE_SECRET=${STRIPE_SECRET} ./dist/gostripe_api -port=${API_PORT} &
+	@./dist/server_main &
 	@echo "Back end running!"
 
 ## start_invoice: starts the invoice microservice
 start_invoice: build_invoice
 	@echo "Starting the invoice microservice..."
-	@./dist/invoice &
+	@./dist/server_invoice &
 	@echo "Invoice microservice running!"
 
 ## start_front: starts the front end
 start_front: build_front
 	@echo "Starting the front end..."
-	@env STRIPE_KEY=${STRIPE_KEY} STRIPE_SECRET=${STRIPE_SECRET} ./dist/gostripe -port=${GOSTRIPE_PORT} &
+	@./dist/frontend &
 	@echo "Front end running!"
 
 ## stop: stops the front and back end
@@ -84,19 +84,19 @@ stop: stop_front stop_back stop_invoice
 ## stop_front: stops the front end
 stop_front:
 	@echo "Stopping the front end..."
-	@-pkill -SIGTERM -f "gostripe -port=${GOSTRIPE_PORT}"
+	@-pkill -SIGTERM -f "frontend"
 	@echo "Stopped front end"
 
 ## stop_invoice: stops the invoice microservice
 stop_invoice:
 	@echo "Stopping the invoice microservice..."
-	@-pkill -SIGTERM -f "invoice"
+	@-pkill -SIGTERM -f "server_invoice"
 	@echo "Stopped invoice microservice"
 
 ## stop_back: stops the back end
 stop_back:
 	@echo "Stopping the back end..."
-	@-pkill -SIGTERM -f "gostripe_api -port=${API_PORT}"
+	@-pkill -SIGTERM -f "server_main"
 	@echo "Stopped back end"
 
 proto:
