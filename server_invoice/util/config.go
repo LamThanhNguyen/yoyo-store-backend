@@ -22,7 +22,6 @@ type Config struct {
 	SmtpPort        int      `mapstructure:"SMTP_PORT" json:"SMTP_PORT"`
 	SmtpUsername    string   `mapstructure:"SMTP_USERNAME" json:"SMTP_USERNAME"`
 	SmtpPassword    string   `mapstructure:"SMTP_PASSWORD" json:"SMTP_PASSWORD"`
-	FrontendDomain  string   `mapstructure:"FRONTEND_DOMAIN" json:"FRONTEND_DOMAIN"`
 }
 
 // LoadConfig reads configuration from file or environment variables.

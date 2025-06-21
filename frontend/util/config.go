@@ -16,22 +16,17 @@ import (
 )
 
 type Config struct {
-	Environment          string   `mapstructure:"ENVIRONMENT" json:"ENVIRONMENT"`
-	AllowedOrigins       []string `mapstructure:"ALLOWED_ORIGINS" json:"ALLOWED_ORIGINS"`
-	DBSource             string   `mapstructure:"DB_SOURCE" json:"DB_SOURCE"`
-	MigrationURL         string   `mapstructure:"MIGRATION_URL" json:"MIGRATION_URL"`
-	MainServerPort       string   `mapstructure:"MAIN_SERVER_PORT" json:"MAIN_SERVER_PORT"`
-	InvoiceGrpcAddr      string   `mapstructure:"INVOICE_GRPC_ADDR" json:"INVOICE_GRPC_ADDR"`
-	TokenSymmetricKey    string   `mapstructure:"TOKEN_SYMMETRIC_KEY" json:"TOKEN_SYMMETRIC_KEY"`
-	AccessTokenDuration  string   `mapstructure:"ACCESS_TOKEN_DURATION" json:"ACCESS_TOKEN_DURATION"`
-	RefreshTokenDuration string   `mapstructure:"REFRESH_TOKEN_DURATION" json:"REFRESH_TOKEN_DURATION"`
-	SmtpHost             string   `mapstructure:"SMTP_HOST" json:"SMTP_HOST"`
-	SmtpPort             int      `mapstructure:"SMTP_PORT" json:"SMTP_PORT"`
-	SmtpUsername         string   `mapstructure:"SMTP_USERNAME" json:"SMTP_USERNAME"`
-	SmtpPassword         string   `mapstructure:"SMTP_PASSWORD" json:"SMTP_PASSWORD"`
-	FrontendAddr         string   `mapstructure:"FRONTEND_ADDR" json:"FRONTEND_ADDR"`
-	StripeKey            string   `mapstructure:"STRIPE_KEY" json:"STRIPE_KEY"`
-	StripeSecret         string   `mapstructure:"STRIPE_SECRET" json:"STRIPE_SECRET"`
+	Environment          string `mapstructure:"ENVIRONMENT" json:"ENVIRONMENT"`
+	DBSource             string `mapstructure:"DB_SOURCE" json:"DB_SOURCE"`
+	FrontendPort         string `mapstructure:"FRONTEND_PORT" json:"FRONTEND_PORT"`
+	TokenSymmetricKey    string `mapstructure:"TOKEN_SYMMETRIC_KEY" json:"TOKEN_SYMMETRIC_KEY"`
+	AccessTokenDuration  string `mapstructure:"ACCESS_TOKEN_DURATION" json:"ACCESS_TOKEN_DURATION"`
+	RefreshTokenDuration string `mapstructure:"REFRESH_TOKEN_DURATION" json:"REFRESH_TOKEN_DURATION"`
+	MainServerAddr       string `mapstructure:"MAIN_SERVER_ADDR" json:"MAIN_SERVER_ADDR"`
+	InvoiceGrpcAddr      string `mapstructure:"INVOICE_GRPC_ADDR" json:"INVOICE_GRPC_ADDR"`
+	FrontendAddr         string `mapstructure:"FRONTEND_ADDR" json:"FRONTEND_ADDR"`
+	StripeKey            string `mapstructure:"STRIPE_KEY" json:"STRIPE_KEY"`
+	StripeSecret         string `mapstructure:"STRIPE_SECRET" json:"STRIPE_SECRET"`
 }
 
 type RuntimeConfig struct {

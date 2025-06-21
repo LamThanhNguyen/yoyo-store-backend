@@ -120,7 +120,7 @@ func (server *Server) SendPasswordResetEmail(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	link := fmt.Sprintf("%s/reset-password?email=%s", server.config.FrontendDomain, payload.Email)
+	link := fmt.Sprintf("%s/reset-password?email=%s", server.config.FrontendAddr, payload.Email)
 
 	sign := urlsigner.Signer{
 		Secret: []byte(server.config.TokenSymmetricKey),

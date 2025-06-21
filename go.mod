@@ -3,6 +3,8 @@ module github.com/LamThanhNguyen/yoyo-store-backend
 go 1.24.2
 
 require (
+	github.com/alexedwards/scs/postgresstore v0.0.0-20250417082927-ab20b3feb5e9
+	github.com/alexedwards/scs/v2 v2.8.0
 	github.com/aws/aws-sdk-go-v2 v1.36.5
 	github.com/aws/aws-sdk-go-v2/config v1.29.17
 	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.35.7
@@ -11,6 +13,7 @@ require (
 	github.com/go-chi/cors v1.2.1
 	github.com/golang-migrate/migrate/v4 v4.18.3
 	github.com/golang/protobuf v1.5.4
+	github.com/gorilla/websocket v1.5.3
 	github.com/phpdave11/gofpdf v1.4.3
 	github.com/rs/zerolog v1.34.0
 	github.com/spf13/viper v1.20.1

@@ -3,6 +3,7 @@ package urlsigner
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	goalone "github.com/bwmarrin/go-alone"
 )
@@ -24,4 +25,23 @@ func (s *Signer) GenerateTokenFromString(data string) string {
 	tokenBytes := crypt.Sign([]byte(urlToSign))
 	token := string(tokenBytes)
 	return token
+}
+
+func (s *Signer) VerifyToken(token string) bool {
+	crypt := goalone.New(s.Secret, goalone.Timestamp)
+	_, err := crypt.Unsign([]byte(token))
+
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+
+	return true
+}
+
+func (s *Signer) Expired(token string, minutesUntilExpire int) bool {
+	crypt := goalone.New(s.Secret, goalone.Timestamp)
+	ts := crypt.Parse([]byte(token))
+
+	return time.Since(ts.Timestamp) > time.Duration(minutesUntilExpire)*time.Minute
 }
