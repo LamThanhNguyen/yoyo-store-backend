@@ -43,6 +43,7 @@ func (server *Server) SetupRouter() {
 		MaxAge:           300,
 	}))
 
+	mux.Get("/api/v1/health", server.handleHealthCheck)
 	mux.Post("/api/v1/payment-intent", server.GetPaymentIntent)
 	mux.Get("/api/v1/items/{id}", server.GetItemByID)
 	mux.Post("/api/create-customer-and-subscribe-to-plan", server.CreateCustomerAndSubscribeToPlan)
@@ -228,4 +229,9 @@ func (server *Server) authenticateToken(r *http.Request) (*models.User, error) {
 	}
 
 	return user, nil
+}
+
+func (server *Server) handleHealthCheck(w http.ResponseWriter, r *http.Request) {
+	var data = map[string]string{"status": "ok"}
+	server.writeJSON(w, http.StatusOK, data)
 }

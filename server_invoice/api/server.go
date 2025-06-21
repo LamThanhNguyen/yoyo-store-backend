@@ -39,7 +39,8 @@ func (server *Server) SetupRouter() {
 		MaxAge:           300,
 	}))
 
-	mux.Post("/invoice/create-and-send", server.CreateAndSendInvoice)
+	mux.Get("/api/v1/health", server.handleHealthCheck)
+	// mux.Post("/invoice/create-and-send", server.CreateAndSendInvoice)
 
 	server.router = mux
 }
@@ -130,4 +131,9 @@ func (server *Server) CreateDirIfNotExist(path string) error {
 		}
 	}
 	return nil
+}
+
+func (server *Server) handleHealthCheck(w http.ResponseWriter, r *http.Request) {
+	var data = map[string]string{"status": "ok"}
+	server.writeJSON(w, http.StatusOK, data)
 }

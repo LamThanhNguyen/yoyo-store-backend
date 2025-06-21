@@ -18,6 +18,7 @@ type Config struct {
 	Environment     string   `mapstructure:"ENVIRONMENT" json:"ENVIRONMENT"`
 	AllowedOrigins  []string `mapstructure:"ALLOWED_ORIGINS" json:"ALLOWED_ORIGINS"`
 	InvoiceGrpcPort string   `mapstructure:"INVOICE_GRPC_PORT" json:"INVOICE_GRPC_PORT"`
+	InvoiceHttpPort string   `mapstructure:"INVOICE_HTTP_PORT" json:"INVOICE_HTTP_PORT"`
 	SmtpHost        string   `mapstructure:"SMTP_HOST" json:"SMTP_HOST"`
 	SmtpPort        int      `mapstructure:"SMTP_PORT" json:"SMTP_PORT"`
 	SmtpUsername    string   `mapstructure:"SMTP_USERNAME" json:"SMTP_USERNAME"`

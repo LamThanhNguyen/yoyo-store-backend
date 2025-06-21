@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -55,7 +56,9 @@ func runServer(
 		log.Fatal().Err(err).Msg("cannot create server")
 	}
 
-	server.CreateDirIfNotExist("./invoices")
+	if err := server.CreateDirIfNotExist("./invoices"); err != nil {
+		log.Fatal().Err(err).Msg("failed to create invoices directory")
+	}
 
 	grpcServer := grpc.NewServer()
 	pb.RegisterInvoiceServiceServer(grpcServer, api.NewGRPCServer(server))
@@ -65,11 +68,33 @@ func runServer(
 		log.Fatal().Err(err).Msg("failed to listen")
 	}
 
+	server.SetupRouter() // initialize routes
+
+	// Setup HTTP server
+	httpServer := &http.Server{
+		Addr:              config.InvoiceHttpPort,
+		Handler:           server.Router(), // use the Gin router
+		IdleTimeout:       30 * time.Second,
+		ReadTimeout:       10 * time.Second,
+		ReadHeaderTimeout: 5 * time.Second,
+		WriteTimeout:      5 * time.Second,
+	}
+
 	// Start gRPC server in goroutine
 	waitGroup.Go(func() error {
 		log.Info().Msgf("start gRPC server at %s", lis.Addr())
 		if err := grpcServer.Serve(lis); err != nil && !errors.Is(err, grpc.ErrServerStopped) {
 			log.Error().Err(err).Msg("gRPC server failed to serve")
+			return err
+		}
+		return nil
+	})
+
+	// Start HTTP server in goroutine
+	waitGroup.Go(func() error {
+		log.Info().Msgf("start HTTP server at %s", httpServer.Addr)
+		if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Error().Err(err).Msg("HTTP server failed to serve")
 			return err
 		}
 		return nil
@@ -93,6 +118,23 @@ func runServer(
 		}
 
 		log.Info().Msg("gRPC server is stopped")
+		return nil
+	})
+
+	// Graceful shutdown on context cancel
+	waitGroup.Go(func() error {
+		<-ctx.Done()
+		log.Info().Msg("graceful shutdown HTTP server")
+
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		if err := httpServer.Shutdown(shutdownCtx); err != nil {
+			log.Error().Err(err).Msg("failed to shutdown HTTP server")
+			return err
+		}
+
+		log.Info().Msg("HTTP server is stopped")
 		return nil
 	})
 }
