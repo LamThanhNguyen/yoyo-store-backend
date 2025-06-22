@@ -17,3 +17,7 @@ CREATE TABLE "customers" (
   "created_at" timestamptz NOT NULL DEFAULT (now()),
   "updated_at" timestamptz NOT NULL DEFAULT (now())
 );
+
+INSERT INTO "users" ("first_name", "last_name", "email", "password")
+VALUES
+  ('admin', 'user', 'admin@example.com', '$2a$12$3tnHsXODFvT/rhPAf1YVVu3FBp/IzrFnJXgAhJdpqdlIKe8jGZnk6');

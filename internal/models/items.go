@@ -28,7 +28,7 @@ func (m *DBModel) GetItem(id int) (Item, error) {
 
 	row := m.DB.QueryRowContext(ctx, `
 		select 
-			id, name, description, inventory_level, price, coalesce(image, ''),
+			id, name, inventory_level, description, price, coalesce(image, ''),
 			is_recurring, plan_id,
 			created_at, updated_at
 		from

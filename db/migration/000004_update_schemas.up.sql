@@ -18,3 +18,8 @@ ALTER TABLE orders
     REFERENCES customers(id)
     ON DELETE CASCADE
     ON UPDATE CASCADE;
+
+INSERT INTO "items" ("name", "inventory_level", "price", "description", "image", "is_recurring", "plan_id")
+VALUES
+  ('Yoyo', 10, 1000, 'A very nice yoyo', '/static/yoyo4.png', false, ''),
+  ('Bronze Plan', 10, 2000, 'Get three yoyo for the price of two every month.', '', true, 'prod_SWJPFC8jKDFvVP');

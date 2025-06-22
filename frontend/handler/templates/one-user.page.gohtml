@@ -88,24 +88,24 @@ function val() {
     }
 
     const requestOptions = {
-        method: 'post',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token,
-            },
+        method: 'PATCH',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token,
+        },
         body: JSON.stringify(payload),
-    }
+    };
 
     fetch("{{.API}}/api/v1/admin/all-users/edit/" + id, requestOptions)
     .then(response => response.json())
-    .then(function(data){
+    .then(function (data) {
         if (data.error) {
             Swal.fire("Error: " + data.message);
         } else {
             location.href = "/admin/all-users";
         }
-    })
+    });
 }
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -116,24 +116,22 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         const requestOptions = {
-            method: 'post',
+            method: 'GET',
             headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + token,
             }
-        }
+        };
 
         fetch('{{.API}}/api/v1/admin/all-users/' + id, requestOptions)
         .then(response => response.json())
         .then(function (data) {
-            console.log(data);
             if (data) {
                 document.getElementById("first_name").value = data.first_name;
                 document.getElementById("last_name").value = data.last_name;
                 document.getElementById("email").value = data.email;
             }
-        })
+        });
     }
 })
 
@@ -149,32 +147,32 @@ delBtn.addEventListener("click", function() {
     }).then((result) => {
         if (result.isConfirmed) {
             const requestOptions = {
-                method: 'post',
+                method: 'DELETE',
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + token,
                 }
-            }
+            };
 
             fetch("{{.API}}/api/v1/admin/all-users/delete/" + id, requestOptions)
             .then(response => response.json())
-            .then(function(data){
+            .then(function (data) {
                 if (data.error) {
                     Swal.fire("Error: " + data.message);
                 } else {
-                    let jsonData = {
-                        action: "deleteUser",
-                        user_id: parseInt(id, 10),
+                    // optional: if you have websocket for live update
+                    if (typeof socket !== 'undefined') {
+                        let jsonData = {
+                            action: "deleteUser",
+                            user_id: parseInt(id, 10),
+                        };
+                        socket.send(JSON.stringify(jsonData));
                     }
-
-                    socket.send(JSON.stringify(jsonData));
-                    
-                    location.href="/admin/all-users";
+                    location.href = "/admin/all-users";
                 }
-            })
+            });
         }
-    })
-})
+    });
+});
 </script>
 {{end}}

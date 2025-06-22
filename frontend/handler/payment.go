@@ -22,7 +22,7 @@ func (server *Server) ChargeOnce(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := make(map[string]interface{})
-	data["yoyo"] = yoyo
+	data["item"] = yoyo
 
 	if err := server.renderTemplate(w, r, "buy-once", &templateData{
 		Data: data,
