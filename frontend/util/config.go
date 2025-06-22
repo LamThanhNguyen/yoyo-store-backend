@@ -25,6 +25,7 @@ type Config struct {
 	MainServerAddr       string `mapstructure:"MAIN_SERVER_ADDR" json:"MAIN_SERVER_ADDR"`
 	InvoiceGrpcAddr      string `mapstructure:"INVOICE_GRPC_ADDR" json:"INVOICE_GRPC_ADDR"`
 	FrontendAddr         string `mapstructure:"FRONTEND_ADDR" json:"FRONTEND_ADDR"`
+	FrontendWsAddr       string `mapstructure:"FRONTEND_WS_ADDR" json:"FRONTEND_WS_ADDR"`
 	StripeKey            string `mapstructure:"STRIPE_KEY" json:"STRIPE_KEY"`
 	StripeSecret         string `mapstructure:"STRIPE_SECRET" json:"STRIPE_SECRET"`
 }

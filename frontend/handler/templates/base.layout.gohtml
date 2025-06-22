@@ -90,7 +90,7 @@
   let socket;
   
   document.addEventListener("DOMContentLoaded", function() {
-    socket = new WebSocket("ws://localhost:3000/ws")
+    socket = new WebSocket("{{.FrontendWsAddr}}")
 
     socket.onopen = () => {
       console.log("Successfully connected to websockets");

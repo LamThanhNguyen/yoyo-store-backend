@@ -22,6 +22,7 @@ type templateData struct {
 	IsAuthenticated      int
 	UserID               int
 	API                  string
+	FrontendWsAddr       string
 	CSSVersion           string
 	StripeSecretKey      string
 	StripePublishableKey string
@@ -98,6 +99,7 @@ func (server *Server) parseTemplate(partials []string, page, templateToRender st
 
 func (server *Server) addDefaultData(td *templateData, r *http.Request) *templateData {
 	td.API = server.config.MainServerAddr
+	td.FrontendWsAddr = server.config.FrontendWsAddr
 	td.StripeSecretKey = server.config.StripeSecret
 	td.StripePublishableKey = server.config.StripeKey
 
