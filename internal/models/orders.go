@@ -27,13 +27,16 @@ func (m *DBModel) InsertOrder(order Order) (int, error) {
 	defer cancel()
 
 	stmt := `
-		insert into orders
+		INSERT INTO orders
 			(item_id, transaction_id, status_id, quantity, customer_id,
 			amount, created_at, updated_at)
-		values ($1, $2, $3, $4, $5, $6, $7, $8)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		RETURNING id
 	`
-
-	result, err := m.DB.ExecContext(ctx, stmt,
+	var id int
+	err := m.DB.QueryRowContext(
+		ctx,
+		stmt,
 		order.ItemID,
 		order.TransactionID,
 		order.StatusID,
@@ -42,17 +45,12 @@ func (m *DBModel) InsertOrder(order Order) (int, error) {
 		order.Amount,
 		time.Now(),
 		time.Now(),
-	)
+	).Scan(&id)
 	if err != nil {
 		return 0, err
 	}
 
-	id, err := result.LastInsertId()
-	if err != nil {
-		return 0, err
-	}
-
-	return int(id), nil
+	return id, nil
 }
 
 // GetAllOrdersPaginated returns a slice of a subset of orders

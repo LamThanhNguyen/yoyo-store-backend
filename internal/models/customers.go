@@ -21,11 +21,14 @@ func (m *DBModel) InsertCustomer(c Customer) (int, error) {
 	defer cancel()
 
 	stmt := `
-		insert into customers
+		INSERT INTO customers
 			(first_name, last_name, email, created_at, updated_at)
-		values ($1, $2, $3, $4, $5)`
+		VALUES ($1, $2, $3, $4, $5)
+		RETURNING id
+	`
 
-	result, err := m.DB.ExecContext(
+	var id int
+	err := m.DB.QueryRowContext(
 		ctx,
 		stmt,
 		c.FirstName,
@@ -33,15 +36,10 @@ func (m *DBModel) InsertCustomer(c Customer) (int, error) {
 		c.Email,
 		time.Now(),
 		time.Now(),
-	)
+	).Scan(&id)
 	if err != nil {
 		return 0, err
 	}
 
-	id, err := result.LastInsertId()
-	if err != nil {
-		return 0, err
-	}
-
-	return int(id), nil
+	return id, nil
 }

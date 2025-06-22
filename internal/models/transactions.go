@@ -27,14 +27,18 @@ func (m *DBModel) InsertTransaction(txn Transaction) (int, error) {
 	defer cancel()
 
 	stmt := `
-		insert into transactions
+		INSERT INTO transactions
 			(amount, currency, last_four, bank_return_code, expiry_month, expiry_year,
 				payment_intent, payment_method,
 			transaction_status_id, created_at, updated_at)
-		values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+		RETURNING id
 	`
 
-	result, err := m.DB.ExecContext(ctx, stmt,
+	var id int
+	err := m.DB.QueryRowContext(
+		ctx,
+		stmt,
 		txn.Amount,
 		txn.Currency,
 		txn.LastFour,
@@ -46,15 +50,10 @@ func (m *DBModel) InsertTransaction(txn Transaction) (int, error) {
 		txn.TransactionStatusID,
 		time.Now(),
 		time.Now(),
-	)
+	).Scan(&id)
 	if err != nil {
 		return 0, err
 	}
 
-	id, err := result.LastInsertId()
-	if err != nil {
-		return 0, err
-	}
-
-	return int(id), nil
+	return id, nil
 }
