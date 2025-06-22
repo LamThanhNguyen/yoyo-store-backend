@@ -132,6 +132,7 @@ func (server *Server) PaymentSucceeded(w http.ResponseWriter, r *http.Request) {
 	err = server.callInvoiceMicro(inv)
 	if err != nil {
 		log.Error().Err(err).Msg("PaymentSucceeded")
+		return
 	}
 
 	// write this data to session, and then redirect user to new page

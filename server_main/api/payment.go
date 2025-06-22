@@ -192,7 +192,7 @@ func (server *Server) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, r 
 	}
 
 	resp := jsonResponse{
-		OK:      false,
+		OK:      okay,
 		Message: txnMsg,
 	}
 

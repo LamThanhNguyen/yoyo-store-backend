@@ -25,7 +25,7 @@ type Invoice struct {
 
 // callInvoiceMicro calls the invoicing microservice
 func (server *Server) callInvoiceMicro(inv Invoice) error {
-	_, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	_, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	clientConn, err := grpc.NewClient(
@@ -40,7 +40,7 @@ func (server *Server) callInvoiceMicro(inv Invoice) error {
 	client := pb.NewInvoiceServiceClient(clientConn)
 
 	// Separate context for the actual request (best practice)
-	reqCtx, reqCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	reqCtx, reqCancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer reqCancel()
 
 	_, err = client.CreateAndSendInvoice(reqCtx, &pb.CreateInvoiceRequest{

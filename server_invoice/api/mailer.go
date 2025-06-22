@@ -61,8 +61,8 @@ func (server *Server) SendMail(
 	mail_server.Password = server.config.SmtpPassword
 	mail_server.Encryption = mail.EncryptionTLS
 	mail_server.KeepAlive = false
-	mail_server.ConnectTimeout = 10 * time.Second
-	mail_server.SendTimeout = 10 * time.Second
+	mail_server.ConnectTimeout = 30 * time.Second
+	mail_server.SendTimeout = 30 * time.Second
 
 	smtpClient, err := mail_server.Connect()
 	if err != nil {
