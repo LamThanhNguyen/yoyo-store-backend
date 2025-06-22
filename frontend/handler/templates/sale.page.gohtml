@@ -57,10 +57,9 @@ function showSuccess(msg) {
 document.addEventListener("DOMContentLoaded", function() {
     
     const requestOptions = {
-        method: 'post',
+        method: 'GET',
         headers: {
             'Accept': 'application/json',
-            'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + token,
         },
     }
@@ -68,8 +67,6 @@ document.addEventListener("DOMContentLoaded", function() {
     fetch("{{.API}}/api/v1/admin/get-sale/" + id, requestOptions)
     .then(response => response.json())
     .then(function (data) {
-        console.log(data);
-
         if (data) {
             document.getElementById("order-no").innerHTML = data.id;
             document.getElementById("customer").innerHTML = data.customer.first_name + " " + data.customer.last_name;
@@ -86,8 +83,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 document.getElementById("refunded").classList.remove("d-none");
             }
         }
-    })
-})
+    });
+});
 
 function formatCurrency(amount) {
     let c = parseFloat(amount / 100);

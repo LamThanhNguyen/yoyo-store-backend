@@ -35,7 +35,7 @@ func (server *Server) ShowSale(w http.ResponseWriter, r *http.Request) {
 	stringMap := make(map[string]string)
 	stringMap["title"] = "Sale"
 	stringMap["cancel"] = "/admin/all-sales"
-	stringMap["refund-url"] = "/api/admin/refund"
+	stringMap["refund-url"] = "/api/v1/admin/refund"
 	stringMap["refund-btn"] = "Refund Order"
 	stringMap["refunded-badge"] = "Refunded"
 	stringMap["refunded-msg"] = "Charge refunded"
@@ -52,7 +52,7 @@ func (server *Server) ShowSubscription(w http.ResponseWriter, r *http.Request) {
 	stringMap := make(map[string]string)
 	stringMap["title"] = "Subscription"
 	stringMap["cancel"] = "/admin/all-subscriptions"
-	stringMap["refund-url"] = "/api/admin/cancel-subscription"
+	stringMap["refund-url"] = "/api/v1/admin/cancel-subscription"
 	stringMap["refund-btn"] = "Cancel Subscription"
 	stringMap["refunded-badge"] = "Cancelled"
 	stringMap["refunded-msg"] = "Subscription cancelled"
