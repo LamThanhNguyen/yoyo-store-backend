@@ -34,7 +34,7 @@ func (m *DBModel) GetUserByEmail(email string) (User, error) {
 			id, first_name, last_name, email, password, created_at, updated_at
 		from
 			users
-		where email = ?`, email)
+		where email = $1`, email)
 
 	err := row.Scan(
 		&u.ID,
@@ -58,7 +58,7 @@ func (m *DBModel) UpdatePasswordForUser(u User, hash string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	stmt := `update users set password = ? where id = ?`
+	stmt := `update users set password = $1 where id = $2`
 	_, err := m.DB.ExecContext(ctx, stmt, hash, u.ID)
 	if err != nil {
 		return err
@@ -83,7 +83,7 @@ func (m *DBModel) GetAllUsersPaginated(pageSize, page int) ([]*User, int, int, e
 			users
 		order by
 			last_name, first_name
-		limit ? offset ?
+		limit $1 offset $2
 	`
 
 	rows, err := m.DB.QueryContext(ctx, query, pageSize, offset)
@@ -139,7 +139,7 @@ func (m *DBModel) GetOneUser(id int) (User, error) {
 			id, last_name, first_name, email, created_at, updated_at
 		from
 			users
-		where id = ?`
+		where id = $1`
 
 	row := m.DB.QueryRowContext(ctx, query, id)
 
@@ -164,12 +164,12 @@ func (m *DBModel) EditUser(u User) error {
 
 	stmt := `
 		update users set
-			first_name = ?,
-			last_name = ?,
-			email = ?,
-			updated_at = ?
+			first_name = $1,
+			last_name = $2,
+			email = $3,
+			updated_at = $4
 		where
-			id = ?`
+			id = $5`
 
 	_, err := m.DB.ExecContext(ctx, stmt,
 		u.FirstName,
@@ -191,8 +191,9 @@ func (m *DBModel) AddUser(u User, hash string) error {
 	defer cancel()
 
 	stmt := `
-		insert into users (first_name, last_name, email, password, created_at, updated_at)
-		values (?, ?, ?, ?, ?, ?)`
+		insert into users (first_name, last_name, email, password, created_at, updated_at) 
+		values ($1, $2, $3, $4, $5, $6)
+	`
 
 	_, err := m.DB.ExecContext(ctx, stmt,
 		u.FirstName,
@@ -215,14 +216,14 @@ func (m *DBModel) DeleteUser(id int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	stmt := `delete from users where id = ?`
+	stmt := `delete from users where id = $1`
 
 	_, err := m.DB.ExecContext(ctx, stmt, id)
 	if err != nil {
 		return err
 	}
 
-	stmt = "delete from tokens where user_id = ?"
+	stmt = "delete from tokens where user_id = $1"
 	_, err = m.DB.ExecContext(ctx, stmt, id)
 	if err != nil {
 		return err
@@ -239,7 +240,7 @@ func (m *DBModel) Authenticate(email, password string) (int, error) {
 	var id int
 	var hashedPassword string
 
-	row := m.DB.QueryRowContext(ctx, "select id, password from users where email = ?", email)
+	row := m.DB.QueryRowContext(ctx, "select id, password from users where email = $1", email)
 	err := row.Scan(&id, &hashedPassword)
 	if err != nil {
 		return id, err

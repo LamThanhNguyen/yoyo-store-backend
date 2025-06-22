@@ -153,7 +153,7 @@ document.getElementById("charge_amount").addEventListener("change", function(evt
             body: JSON.stringify(payload),
         }
 
-        fetch("{{.API}}/api/payment-intent", requestOptions)
+        fetch("{{.API}}/api/v1/payment-intent", requestOptions)
             .then(response => response.text())
             .then(response => {
                 let data;
@@ -212,7 +212,7 @@ document.getElementById("charge_amount").addEventListener("change", function(evt
             body: JSON.stringify(payload),
         }
 
-        fetch("{{.API}}/api/admin/virtual-terminal-succeeded", requestOptions)
+        fetch("{{.API}}/api/v1/admin/virtual-terminal-succeeded", requestOptions)
         .then(response => response.json())
         .then(function(data){
             console.log(data);

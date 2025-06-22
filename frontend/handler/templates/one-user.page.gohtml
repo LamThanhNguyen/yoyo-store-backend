@@ -97,7 +97,7 @@ function val() {
         body: JSON.stringify(payload),
     }
 
-    fetch("{{.API}}/api/admin/all-users/edit/" + id, requestOptions)
+    fetch("{{.API}}/api/v1/admin/all-users/edit/" + id, requestOptions)
     .then(response => response.json())
     .then(function(data){
         if (data.error) {
@@ -124,7 +124,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         }
 
-        fetch('{{.API}}/api/admin/all-users/' + id, requestOptions)
+        fetch('{{.API}}/api/v1/admin/all-users/' + id, requestOptions)
         .then(response => response.json())
         .then(function (data) {
             console.log(data);
@@ -157,7 +157,7 @@ delBtn.addEventListener("click", function() {
                 }
             }
 
-            fetch("{{.API}}/api/admin/all-users/delete/" + id, requestOptions)
+            fetch("{{.API}}/api/v1/admin/all-users/delete/" + id, requestOptions)
             .then(response => response.json())
             .then(function(data){
                 if (data.error) {

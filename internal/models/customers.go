@@ -23,7 +23,7 @@ func (m *DBModel) InsertCustomer(c Customer) (int, error) {
 	stmt := `
 		insert into customers
 			(first_name, last_name, email, created_at, updated_at)
-		values (?, ?, ?, ?, ?)`
+		values ($1, $2, $3, $4, $5)`
 
 	result, err := m.DB.ExecContext(
 		ctx,

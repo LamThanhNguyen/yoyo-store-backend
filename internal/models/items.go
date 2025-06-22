@@ -33,7 +33,7 @@ func (m *DBModel) GetItem(id int) (Item, error) {
 			created_at, updated_at
 		from
 			items
-		where id = ?`, id)
+		where id = $1`, id)
 
 	err := row.Scan(
 		&item.ID,

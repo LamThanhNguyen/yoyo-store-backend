@@ -5,7 +5,8 @@ CREATE TABLE "tokens" (
   "email" varchar NOT NULL,
   "token_hash" bytea NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now()),
-  "updated_at" timestamptz NOT NULL DEFAULT (now())
+  "updated_at" timestamptz NOT NULL DEFAULT (now()),
+  "expiry" timestamptz NOT NULL
 );
 
 CREATE TABLE "sessions" (

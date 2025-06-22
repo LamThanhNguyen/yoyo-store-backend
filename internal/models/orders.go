@@ -30,7 +30,7 @@ func (m *DBModel) InsertOrder(order Order) (int, error) {
 		insert into orders
 			(item_id, transaction_id, status_id, quantity, customer_id,
 			amount, created_at, updated_at)
-		values (?, ?, ?, ?, ?, ?, ?, ?)
+		values ($1, $2, $3, $4, $5, $6, $7, $8)
 	`
 
 	result, err := m.DB.ExecContext(ctx, stmt,
@@ -81,7 +81,7 @@ func (m *DBModel) GetAllOrdersPaginated(pageSize, page int) ([]*Order, int, int,
 		i.is_recurring = false
 	order by
 		o.created_at desc
-	limit ? offset ?
+	limit $1 offset $2
 	`
 
 	rows, err := m.DB.QueryContext(ctx, query, pageSize, offset)
@@ -171,7 +171,7 @@ func (m *DBModel) GetAllSubscriptionsPaginated(pageSize, page int) ([]*Order, in
 		i.is_recurring = true
 	order by
 		o.created_at desc
-	limit ? offset ?
+	limit $1 offset $2
 	`
 
 	rows, err := m.DB.QueryContext(ctx, query, pageSize, offset)
@@ -255,7 +255,7 @@ func (m *DBModel) GetOrderByID(id int) (Order, error) {
 			left join transactions t on (o.transaction_id = t.id)
 			left join customers c on (o.customer_id = c.id)
 		where
-			o.id = ?
+			o.id = $1
 	`
 
 	row := m.DB.QueryRowContext(ctx, query, id)
@@ -297,7 +297,7 @@ func (m *DBModel) UpdateOrderStatus(id, statusID int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	stmt := "update orders set status_id = ? where id = ?"
+	stmt := "update orders set status_id = $1 where id = $2"
 
 	_, err := m.DB.ExecContext(ctx, stmt, statusID, id)
 	if err != nil {
