@@ -5,48 +5,84 @@
 {{end}}
 
 {{define "content"}}
-<h2 class="mt-5">All Admin Users</h2>
-<hr>
-<div class="float-end">
+    <h2 class="mt-5">All Admin Users</h2>
+    <hr>
+    <div class="float-end">
     <a class="btn btn-outline-secondary" href="/admin/all-users/0">Add User</a>
-</div>
-<div class="clearfix"></div>
+    </div>
+    <div class="clearfix"></div>
 
-<table id="user-table" class="table table-striped">
-<thead>
-    <tr>
-        <th>User</th>
-        <th>Email</th>
-    </tr>
-</thead>
-<tbody>
+    <table id="users-table" class="table table-striped">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
 
-</tbody>
-</table>
+        </tbody>
+    </table>
+
+    <nav>
+        <ul id="paginator" class="pagination">
+
+        </u>
+    </nav>
 
 {{end}}
 
 {{define "js"}}
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    let tbody = document.getElementById("user-table").getElementsByTagName("tbody")[0];
+let currentPage = 1;
+let pageSize = 5;
+
+function paginator(pages, curPage) {
+    let p = document.getElementById("paginator");
+
+    let html = `<li class="page-item"><a href="#!" class="page-link pager" data-page="${curPage - 1}">&lt;</a></li>`;
+
+    for (var i = 0; i <= pages; i++) {
+        html += `<li class="page-item"><a href="#!" class="page-link pager" data-page="${i + 1}">${i + 1}</a></li>`;
+    }
+
+    html += `<li class="page-item"><a href="#!" class="page-link pager" data-page="${curPage + 1}">&gt;</a></li>`;
+
+    p.innerHTML = html;
+
+    let pageBtns = document.getElementsByClassName("pager");
+    for (var j = 0; j < pageBtns.length; j++) {
+        pageBtns[j].addEventListener("click", function(evt){
+            let desiredPage = evt.target.getAttribute("data-page");
+            if ((desiredPage > 0) && (desiredPage <= pages + 1)) {
+                updateTable(pageSize, desiredPage);
+            }
+        })
+    }
+}
+
+function updateTable(ps, cp) {
     let token = localStorage.getItem("token");
+    let tbody = document.getElementById("users-table").getElementsByTagName("tbody")[0];
+    tbody.innerHTML = "";
+
+    // Add query params to the URL
+    let url = `{{.API}}/api/v1/admin/all-users?page_size=${encodeURIComponent(ps)}&page=${encodeURIComponent(cp)}`;
 
     const requestOptions = {
-        method: 'post',
+        method: 'GET',
         headers: {
             'Accept': 'application/json',
-            'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + token,
         },
     }
 
-    fetch("{{.API}}/api/v1/admin/all-users", requestOptions)
+    fetch(url, requestOptions)
     .then(response => response.json())
-    .then(function (data) {        
-        console.log(data);
-        if (data) {
-            data.forEach(function(i) {
+    .then(function (data) {
+        console.log(data);       
+        if (data.users) {
+            data.users.forEach(function(i) {
                 let newRow = tbody.insertRow();
                 let newCell = newRow.insertCell();
 
@@ -56,13 +92,18 @@ document.addEventListener("DOMContentLoaded", function() {
                 let item = document.createTextNode(i.email);
                 newCell.appendChild(item);
             });
+            paginator(data.last_page, data.current_page);
         } else {
             let newRow = tbody.insertRow();
-            let newCell = tbody.insertCell();
+            let newCell = newRow.insertCell();
             newCell.setAttribute("colspan", "2");
-            newCell.innerHTML = "no data available";
+            newCell.innerHTML = "No data available";
         }
-    })
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    updateTable(pageSize, currentPage);
 })
 
 </script>

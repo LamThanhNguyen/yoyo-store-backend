@@ -10,9 +10,9 @@ CREATE TABLE "tokens" (
 );
 
 CREATE TABLE "sessions" (
-  "id" uuid PRIMARY KEY,
-  "token" varchar NOT NULL,
+  "token" varchar PRIMARY KEY,
   "data" bytea NOT NULL,
-  "expires_at" timestamptz NOT NULL,
-  "created_at" timestamptz NOT NULL DEFAULT (now())
+  "expiry" timestamptz NOT NULL
 );
+
+CREATE INDEX sessions_expiry_idx ON sessions (expiry);

@@ -8,17 +8,18 @@
     <h2 class="mt-5">All Subscriptions</h2>
     <hr>
     <table id="sales-table" class="table table-striped">
-    <thead>
-    <tr>
-        <th>Transaction</th>
-        <th>Customer</th>
-        <th>Product</th>
-        <th>Amount</th>
-        <th>Status</th>
-    </tr>
-    <tbody>
+        <thead>
+            <tr>
+                <th>Transaction</th>
+                <th>Customer</th>
+                <th>Product</th>
+                <th>Amount</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
 
-    </tbody>
+        </tbody>
     </table>
 
     <nav>
@@ -63,22 +64,18 @@ function updateTable(ps, cp) {
     let tbody = document.getElementById("sales-table").getElementsByTagName("tbody")[0];
     tbody.innerHTML = "";
 
-    let body = {
-        page_size: parseInt(ps, 10),
-        page: parseInt(cp, 10),
-    }
+    // Add query params to the URL
+    let url = `{{.API}}/api/v1/admin/all-subscriptions?page_size=${encodeURIComponent(ps)}&page=${encodeURIComponent(cp)}`;
 
     const requestOptions = {
-        method: 'post',
+        method: 'GET',
         headers: {
             'Accept': 'application/json',
-            'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + token,
         },
-        body: JSON.stringify(body),
     }
 
-    fetch("{{.API}}/api/v1/admin/all-subscriptions", requestOptions)
+    fetch(url, requestOptions)
     .then(response => response.json())
     .then(function (data) {        
         if (data.orders) {
@@ -106,7 +103,7 @@ function updateTable(ps, cp) {
                 } else {
                     newCell.innerHTML = `<span class="badge bg-success">Charged</span>`;
                 }
-            })
+            });
             paginator(data.last_page, data.current_page);
         } else {
             let newRow = tbody.insertRow();
@@ -114,7 +111,7 @@ function updateTable(ps, cp) {
             newCell.setAttribute("colspan", "5");
             newCell.innerHTML = "No data available";
         }
-    })
+    });
 }
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -125,7 +122,7 @@ function formatCurrency(amount) {
     let c = parseFloat(amount / 100);
     return c.toLocaleString("en-CA", {
         style: 'currency',
-        currency: 'CAD',
+        currency: 'USD',
     })
 }
 </script>

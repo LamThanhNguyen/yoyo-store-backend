@@ -64,22 +64,18 @@ function updateTable(ps, cp) {
     let tbody = document.getElementById("sales-table").getElementsByTagName("tbody")[0];
     tbody.innerHTML = "";
 
-    let body = {
-        page_size: parseInt(ps, 10),
-        page: parseInt(cp, 10),
-    }
+    // Add query params to the URL
+    let url = `{{.API}}/api/v1/admin/all-sales?page_size=${encodeURIComponent(ps)}&page=${encodeURIComponent(cp)}`;
 
     const requestOptions = {
-        method: 'post',
+        method: 'GET',
         headers: {
             'Accept': 'application/json',
-            'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + token,
         },
-        body: JSON.stringify(body),
-    }
+    };
 
-    fetch("{{.API}}/api/v1/admin/all-sales", requestOptions)
+    fetch(url, requestOptions)
     .then(response => response.json())
     .then(function (data) {        
         if (data.orders) {
@@ -108,7 +104,7 @@ function updateTable(ps, cp) {
                 } else {
                     newCell.innerHTML = `<span class="badge bg-success">Charged</span>`;
                 }
-            })
+            });
             paginator(data.last_page, data.current_page);
         } else {
             let newRow = tbody.insertRow();
@@ -116,7 +112,7 @@ function updateTable(ps, cp) {
             newCell.setAttribute("colspan", "5");
             newCell.innerHTML = "No data available";
         }
-    })
+    });
 }
 
 document.addEventListener("DOMContentLoaded", function() {
