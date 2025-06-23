@@ -20,6 +20,7 @@ require (
 	github.com/spf13/viper v1.20.1
 	github.com/stripe/stripe-go/v82 v82.2.1
 	github.com/xhit/go-simple-mail/v2 v2.16.0
+	go.uber.org/mock v0.5.2
 	golang.org/x/crypto v0.37.0
 	golang.org/x/sync v0.13.0
 	google.golang.org/grpc v1.67.3

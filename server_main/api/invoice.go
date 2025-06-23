@@ -39,11 +39,14 @@ func (server *Server) callInvoiceMicro(inv Invoice) error {
 
 	client := pb.NewInvoiceServiceClient(clientConn)
 
-	// Separate context for the actual request (best practice)
+	return server.sendInvoice(client, inv)
+}
+
+func (server *Server) sendInvoice(client pb.InvoiceServiceClient, inv Invoice) error {
 	reqCtx, reqCancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer reqCancel()
 
-	_, err = client.CreateAndSendInvoice(reqCtx, &pb.CreateInvoiceRequest{
+	_, err := client.CreateAndSendInvoice(reqCtx, &pb.CreateInvoiceRequest{
 		Id:        int32(inv.ID),
 		Quantity:  int32(inv.Quantity),
 		Amount:    int32(inv.Amount),
