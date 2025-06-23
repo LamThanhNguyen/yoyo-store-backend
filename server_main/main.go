@@ -56,7 +56,7 @@ func main() {
 
 	waitGroup, ctx := errgroup.WithContext(ctx)
 
-	runServer(ctx, waitGroup, runtimeCfg, db_model, connPool)
+	runServer(ctx, waitGroup, runtimeCfg, &db_model, connPool)
 
 	if err = waitGroup.Wait(); err != nil {
 		log.Fatal().Err(err).Msg("err from wait group")
@@ -82,7 +82,7 @@ func runServer(
 	ctx context.Context,
 	waitGroup *errgroup.Group,
 	config util.RuntimeConfig,
-	db models.DBModel,
+	db *models.DBModel,
 	dbConn *sql.DB,
 ) {
 	server, err := api.NewServer(config, db)

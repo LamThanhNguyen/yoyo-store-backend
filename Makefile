@@ -118,7 +118,7 @@ test:
 	go test -v -cover -short ./...
 
 mock:
-	mockgen -package pb -destination internal/pb/mock_invoice_service.go github.com/LamThanhNguyen/yoyo-store-backend/internal/pb InvoiceServiceClient
-	# mockgen -package api -destination server_main/api/mock_interfaces_test.go github.com/LamThanhNguyen/yoyo-store-backend/server_main/api customerInserter,orderInserter,transactionInserter
+	# mockgen -package pb -destination internal/pb/mock_invoice_service.go github.com/LamThanhNguyen/yoyo-store-backend/internal/pb InvoiceServiceClient
+	mockgen -package api -destination server_main/api/mock_interfaces_test.go github.com/LamThanhNguyen/yoyo-store-backend/server_main/api customerInserter,orderInserter,transactionInserter
 
 .PHONY: network postgres createdb dropdb migrateup migrateup1 migratedown migratedown1 new_migration build clean build_back build_invoice build_front start start_back start_invoice start_front stop stop_front stop_invoice stop_back proto mock test

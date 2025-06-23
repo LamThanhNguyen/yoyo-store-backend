@@ -9,13 +9,20 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// orderInserter provides the behaviour required to insert an order.
+// Having this interface allows the use of gomock in tests.
+type orderInserter interface {
+	InsertOrder(models.Order) (int, error)
+}
+
+// saveOrder inserts a new order through the provided interface.
+func saveOrder(db orderInserter, order models.Order) (int, error) {
+	return db.InsertOrder(order)
+}
+
 // SaveOrder saves a order and returns id
 func (server *Server) SaveOrder(order models.Order) (int, error) {
-	id, err := server.DB.InsertOrder(order)
-	if err != nil {
-		return 0, err
-	}
-	return id, nil
+	return saveOrder(server.DB, order)
 }
 
 // AllSales returns all sales as a slice
