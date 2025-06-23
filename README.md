@@ -173,3 +173,23 @@ STRIPE_KEY=
     golangci-lint --version
     golangci-lint run
     ```
+
+## Docker
+
+Each service has its own `Dockerfile` for building a container image.
+
+### Build images
+
+```bash
+docker build -t yoyo-main -f server_main/Dockerfile .
+docker build -t yoyo-invoice -f server_invoice/Dockerfile .
+docker build -t yoyo-frontend -f frontend/Dockerfile .
+```
+
+Run the containers with your environment variables and expose the required ports:
+
+```bash
+docker run --env-file .env -p 8080:8080 yoyo-main
+docker run --env-file .env -p 9090:9090 -p 9091:9091 yoyo-invoice
+docker run --env-file .env -p 3000:3000 yoyo-frontend
+```
