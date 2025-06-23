@@ -179,15 +179,32 @@ Each service has its own `Dockerfile` for building a container image.
 ### Build images
 
 ```bash
-docker build -t yoyo-main -f server_main/Dockerfile .
-docker build -t yoyo-invoice -f server_invoice/Dockerfile .
-docker build -t yoyo-frontend -f frontend/Dockerfile .
+make build_docker_back
+make build_docker_invoice
+make build_docker_front
+make build_docker
 ```
 
 Run the containers with your environment variables and expose the required ports:
 
 ```bash
-docker run --env-file .env -p 8080:8080 yoyo-main
-docker run --env-file .env -p 9090:9090 -p 9091:9091 yoyo-invoice
-docker run --env-file .env -p 3000:3000 yoyo-frontend
+make run_docker_back
+make run_docker_invoice
+make run_docker_front
+make run_docker
 ```
+
+- **Useful Docker commands:**
+    ```bash
+    docker ps
+    docker rm {container-name}
+    docker rmi {image-id}
+    docker container inspect {container-name}
+    docker network create {network-name}
+    docker network connect {network-name} {container-name}
+    docker network ls
+    docker network inspect {network-name}
+    docker stop $(docker ps -a -q)
+    docker rm -f $(docker ps -a -q)
+    docker rmi -f $(docker images -aq)
+    ```
