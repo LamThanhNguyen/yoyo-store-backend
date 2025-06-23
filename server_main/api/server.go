@@ -16,13 +16,13 @@ import (
 )
 
 type Server struct {
-	config util.RuntimeConfig
+	config util.Config
 	DB     *models.DBModel
 	router http.Handler
 }
 
 func NewServer(
-	config util.RuntimeConfig,
+	config util.Config,
 	db *models.DBModel,
 ) (*Server, error) {
 

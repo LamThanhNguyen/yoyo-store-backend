@@ -11,7 +11,7 @@ import (
 )
 
 type Server struct {
-	config        util.RuntimeConfig
+	config        util.Config
 	templateCache map[string]*template.Template
 	DB            models.DBModel
 	Session       *scs.SessionManager
@@ -19,7 +19,7 @@ type Server struct {
 }
 
 func NewServer(
-	config util.RuntimeConfig,
+	config util.Config,
 	templateCache map[string]*template.Template,
 	db models.DBModel,
 	session *scs.SessionManager,

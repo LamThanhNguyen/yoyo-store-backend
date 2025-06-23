@@ -36,27 +36,22 @@ func main() {
 		log.Fatal().Err(err).Msg("cannot load config")
 	}
 
-	runtimeCfg, err := util.NewRuntimeConfig(config)
-	if err != nil {
-		log.Fatal().Err(err).Msg("invalid config values")
-	}
-
-	log.Info().Interface("config", runtimeCfg).Msg("loaded config")
+	log.Info().Interface("config", config).Msg("loaded config")
 
 	// connPool, err := pgxpool.New(ctx, runtimeCfg.DBSource)
-	connPool, err := sql.Open("pgx", runtimeCfg.DBSource)
+	connPool, err := sql.Open("pgx", config.DBSource)
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot connect to db")
 	}
 
 	// Run migration to database
-	runDBMigration(runtimeCfg.MigrationURL, runtimeCfg.DBSource)
+	runDBMigration(config.MigrationURL, config.DBSource)
 
 	db_model := models.DBModel{DB: connPool}
 
 	waitGroup, ctx := errgroup.WithContext(ctx)
 
-	runServer(ctx, waitGroup, runtimeCfg, &db_model, connPool)
+	runServer(ctx, waitGroup, config, &db_model, connPool)
 
 	if err = waitGroup.Wait(); err != nil {
 		log.Fatal().Err(err).Msg("err from wait group")
@@ -81,7 +76,7 @@ func runDBMigration(migrationURL string, dbSource string) {
 func runServer(
 	ctx context.Context,
 	waitGroup *errgroup.Group,
-	config util.RuntimeConfig,
+	config util.Config,
 	db *models.DBModel,
 	dbConn *sql.DB,
 ) {

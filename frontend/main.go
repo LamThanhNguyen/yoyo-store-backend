@@ -41,15 +41,10 @@ func main() {
 		log.Fatal().Err(err).Msg("cannot load config")
 	}
 
-	runtimeCfg, err := util.NewRuntimeConfig(config)
-	if err != nil {
-		log.Fatal().Err(err).Msg("invalid config values")
-	}
-
-	log.Info().Interface("config", runtimeCfg).Msg("loaded config")
+	log.Info().Interface("config", config).Msg("loaded config")
 
 	// connPool, err := pgxpool.New(ctx, runtimeCfg.DBSource)
-	connPool, err := sql.Open("pgx", runtimeCfg.DBSource)
+	connPool, err := sql.Open("pgx", config.DBSource)
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot connect to db")
 	}
@@ -64,7 +59,7 @@ func main() {
 
 	waitGroup, ctx := errgroup.WithContext(ctx)
 
-	runServer(ctx, waitGroup, runtimeCfg, tc, db_model, Session, connPool)
+	runServer(ctx, waitGroup, config, tc, db_model, Session, connPool)
 
 	if err = waitGroup.Wait(); err != nil {
 		log.Fatal().Err(err).Msg("err from wait group")
@@ -76,7 +71,7 @@ func main() {
 func runServer(
 	ctx context.Context,
 	waitGroup *errgroup.Group,
-	config util.RuntimeConfig,
+	config util.Config,
 	templateCache map[string]*template.Template,
 	db models.DBModel,
 	session *scs.SessionManager,
