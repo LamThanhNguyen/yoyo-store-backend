@@ -105,7 +105,9 @@ func (server *Server) writeJSON(
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	w.Write(out)
+	if _, err := w.Write(out); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -155,7 +157,9 @@ func (server *Server) badRequest(
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusBadRequest)
-	w.Write(out)
+	if _, err := w.Write(out); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -173,7 +177,7 @@ func (server *Server) failedValidation(
 	payload.Error = true
 	payload.Message = "failed validation"
 	payload.Errors = errors
-	server.writeJSON(w, http.StatusUnprocessableEntity, payload)
+	_ = server.writeJSON(w, http.StatusUnprocessableEntity, payload)
 }
 
 func (server *Server) invalidCredentials(w http.ResponseWriter) error {
@@ -234,5 +238,5 @@ func (server *Server) authenticateToken(r *http.Request) (*models.User, error) {
 
 func (server *Server) handleHealthCheck(w http.ResponseWriter, r *http.Request) {
 	var data = map[string]string{"status": "ok"}
-	server.writeJSON(w, http.StatusOK, data)
+	_ = server.writeJSON(w, http.StatusOK, data)
 }

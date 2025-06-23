@@ -35,7 +35,7 @@ func (server *Server) AllSales(w http.ResponseWriter, r *http.Request) {
 		if ps, err := strconv.Atoi(val); err == nil && ps > 0 {
 			pageSize = ps
 		} else {
-			server.badRequest(w, r, errors.New("invalid page_size"))
+			_ = server.badRequest(w, r, errors.New("invalid page_size"))
 			return
 		}
 	}
@@ -44,14 +44,14 @@ func (server *Server) AllSales(w http.ResponseWriter, r *http.Request) {
 		if cp, err := strconv.Atoi(val); err == nil && cp > 0 {
 			currentPage = cp
 		} else {
-			server.badRequest(w, r, errors.New("invalid page"))
+			_ = server.badRequest(w, r, errors.New("invalid page"))
 			return
 		}
 	}
 
 	allSales, lastPage, totalRecords, err := server.DB.GetAllOrdersPaginated(pageSize, currentPage)
 	if err != nil {
-		server.badRequest(w, r, err)
+		_ = server.badRequest(w, r, err)
 		return
 	}
 
@@ -69,7 +69,7 @@ func (server *Server) AllSales(w http.ResponseWriter, r *http.Request) {
 	resp.TotalRecords = totalRecords
 	resp.Orders = allSales
 
-	server.writeJSON(w, http.StatusOK, resp)
+	_ = server.writeJSON(w, http.StatusOK, resp)
 }
 
 // AllSubscriptions returns all subscriptions as a slice
@@ -82,7 +82,7 @@ func (server *Server) AllSubscriptions(w http.ResponseWriter, r *http.Request) {
 		if ps, err := strconv.Atoi(val); err == nil && ps > 0 {
 			pageSize = ps
 		} else {
-			server.badRequest(w, r, errors.New("invalid page_size"))
+			_ = server.badRequest(w, r, errors.New("invalid page_size"))
 			return
 		}
 	}
@@ -91,14 +91,14 @@ func (server *Server) AllSubscriptions(w http.ResponseWriter, r *http.Request) {
 		if cp, err := strconv.Atoi(val); err == nil && cp > 0 {
 			currentPage = cp
 		} else {
-			server.badRequest(w, r, errors.New("invalid page"))
+			_ = server.badRequest(w, r, errors.New("invalid page"))
 			return
 		}
 	}
 
 	allSales, lastPage, totalRecords, err := server.DB.GetAllSubscriptionsPaginated(pageSize, currentPage)
 	if err != nil {
-		server.badRequest(w, r, err)
+		_ = server.badRequest(w, r, err)
 		return
 	}
 
@@ -116,7 +116,7 @@ func (server *Server) AllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	resp.TotalRecords = totalRecords
 	resp.Orders = allSales
 
-	server.writeJSON(w, http.StatusOK, resp)
+	_ = server.writeJSON(w, http.StatusOK, resp)
 }
 
 // GetSale returns one sale as json, by id
@@ -126,9 +126,9 @@ func (server *Server) GetSale(w http.ResponseWriter, r *http.Request) {
 
 	order, err := server.DB.GetOrderByID(orderID)
 	if err != nil {
-		server.badRequest(w, r, err)
+		_ = server.badRequest(w, r, err)
 		return
 	}
 
-	server.writeJSON(w, http.StatusOK, order)
+	_ = server.writeJSON(w, http.StatusOK, order)
 }

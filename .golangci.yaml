@@ -1,8 +1,20 @@
-run:
-  timeout: 5m    # Increases the timeout for all runs (default is 1m)
-
+version: "2"
 linters:
-  enable:
-    - govet
-    - errcheck
-    - staticcheck
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

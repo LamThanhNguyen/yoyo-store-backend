@@ -32,7 +32,9 @@ func (server *Server) LoginPage(w http.ResponseWriter, r *http.Request) {
 
 // PostLoginPage handles the posted login form
 func (server *Server) PostLoginPage(w http.ResponseWriter, r *http.Request) {
-	server.Session.RenewToken(r.Context())
+	if err := server.Session.RenewToken(r.Context()); err != nil {
+		log.Error().Err(err).Msg("Session.RenewToken")
+	}
 
 	err := r.ParseForm()
 	if err != nil {
@@ -43,8 +45,8 @@ func (server *Server) PostLoginPage(w http.ResponseWriter, r *http.Request) {
 	email := r.Form.Get("email")
 	password := r.Form.Get("password")
 
-	id, err := server.DB.Authenticate(email, password)
-	if err != nil {
+	id, authErr := server.DB.Authenticate(email, password)
+	if authErr != nil {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
@@ -55,8 +57,12 @@ func (server *Server) PostLoginPage(w http.ResponseWriter, r *http.Request) {
 
 // Logout logs the user out
 func (server *Server) Logout(w http.ResponseWriter, r *http.Request) {
-	server.Session.Destroy(r.Context())
-	server.Session.RenewToken(r.Context())
+	if err := server.Session.Destroy(r.Context()); err != nil {
+		log.Error().Err(err).Msg("Session.Destroy")
+	}
+	if err := server.Session.RenewToken(r.Context()); err != nil {
+		log.Error().Err(err).Msg("Session.RenewToken")
+	}
 
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }

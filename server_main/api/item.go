@@ -27,5 +27,7 @@ func (server *Server) GetItemByID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(out)
+	if _, err := w.Write(out); err != nil {
+		log.Error().Err(err).Msg("GetItemByID write")
+	}
 }

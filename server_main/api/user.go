@@ -24,40 +24,40 @@ func (server *Server) CreateAuthToken(w http.ResponseWriter, r *http.Request) {
 
 	err := server.readJSON(w, r, &userInput)
 	if err != nil {
-		server.badRequest(w, r, err)
+		_ = server.badRequest(w, r, err)
 		return
 	}
 
 	// get the user from the database by email; send error if invalid email
 	user, err := server.DB.GetUserByEmail(userInput.Email)
 	if err != nil {
-		server.invalidCredentials(w)
+		_ = server.invalidCredentials(w)
 		return
 	}
 
 	// validate the password; send error if invalid password
 	validPassword, err := server.passwordMatches(user.Password, userInput.Password)
 	if err != nil {
-		server.invalidCredentials(w)
+		_ = server.invalidCredentials(w)
 		return
 	}
 
 	if !validPassword {
-		server.invalidCredentials(w)
+		_ = server.invalidCredentials(w)
 		return
 	}
 
 	// generate the token
 	token, err := models.GenerateToken(user.ID, 24*time.Hour, models.ScopeAuthentication)
 	if err != nil {
-		server.badRequest(w, r, err)
+		_ = server.badRequest(w, r, err)
 		return
 	}
 
 	// save to database
 	err = server.DB.InsertToken(token, user)
 	if err != nil {
-		server.badRequest(w, r, err)
+		_ = server.badRequest(w, r, err)
 		return
 	}
 
@@ -80,7 +80,7 @@ func (server *Server) CheckAuthentication(w http.ResponseWriter, r *http.Request
 	// validate the token, and get associated user
 	user, err := server.authenticateToken(r)
 	if err != nil {
-		server.invalidCredentials(w)
+		_ = server.invalidCredentials(w)
 		return
 	}
 
@@ -92,7 +92,7 @@ func (server *Server) CheckAuthentication(w http.ResponseWriter, r *http.Request
 
 	payload.Error = false
 	payload.Message = fmt.Sprintf("authenticated user %s", user.Email)
-	server.writeJSON(w, http.StatusOK, payload)
+	_ = server.writeJSON(w, http.StatusOK, payload)
 }
 
 // SendPasswordResetEmail sends an email with a signed url to allow user to reset password
@@ -103,7 +103,7 @@ func (server *Server) SendPasswordResetEmail(w http.ResponseWriter, r *http.Requ
 
 	err := server.readJSON(w, r, &payload)
 	if err != nil {
-		server.badRequest(w, r, err)
+		_ = server.badRequest(w, r, err)
 		return
 	}
 
@@ -116,7 +116,7 @@ func (server *Server) SendPasswordResetEmail(w http.ResponseWriter, r *http.Requ
 		}
 		resp.Error = true
 		resp.Message = "No matching email found on our system"
-		server.writeJSON(w, http.StatusAccepted, resp)
+		_ = server.writeJSON(w, http.StatusAccepted, resp)
 		return
 	}
 
@@ -138,7 +138,7 @@ func (server *Server) SendPasswordResetEmail(w http.ResponseWriter, r *http.Requ
 	err = server.SendMail("info@yoyo.com", payload.Email, "Password Reset Request", "password-reset", data)
 	if err != nil {
 		log.Error().Err(err).Msg("SendPasswordResetEmail")
-		server.badRequest(w, r, err)
+		_ = server.badRequest(w, r, err)
 		return
 	}
 
@@ -149,7 +149,7 @@ func (server *Server) SendPasswordResetEmail(w http.ResponseWriter, r *http.Requ
 
 	resp.Error = false
 
-	server.writeJSON(w, http.StatusCreated, resp)
+	_ = server.writeJSON(w, http.StatusCreated, resp)
 }
 
 // ResetPassword resets a user's password in the database
@@ -161,7 +161,7 @@ func (server *Server) ResetPassword(w http.ResponseWriter, r *http.Request) {
 
 	err := server.readJSON(w, r, &payload)
 	if err != nil {
-		server.badRequest(w, r, err)
+		_ = server.badRequest(w, r, err)
 		return
 	}
 
@@ -171,25 +171,25 @@ func (server *Server) ResetPassword(w http.ResponseWriter, r *http.Request) {
 
 	realEmail, err := encyrptor.Decrypt(payload.Email)
 	if err != nil {
-		server.badRequest(w, r, err)
+		_ = server.badRequest(w, r, err)
 		return
 	}
 
 	user, err := server.DB.GetUserByEmail(realEmail)
 	if err != nil {
-		server.badRequest(w, r, err)
+		_ = server.badRequest(w, r, err)
 		return
 	}
 
 	newHash, err := bcrypt.GenerateFromPassword([]byte(payload.Password), 12)
 	if err != nil {
-		server.badRequest(w, r, err)
+		_ = server.badRequest(w, r, err)
 		return
 	}
 
 	err = server.DB.UpdatePasswordForUser(user, string(newHash))
 	if err != nil {
-		server.badRequest(w, r, err)
+		_ = server.badRequest(w, r, err)
 		return
 	}
 
@@ -199,8 +199,7 @@ func (server *Server) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	}
 	resp.Error = false
 	resp.Message = "password changed"
-
-	server.writeJSON(w, http.StatusCreated, resp)
+	_ = server.writeJSON(w, http.StatusCreated, resp)
 }
 
 // AllUsers returns a JSON file listing all admin users
@@ -213,7 +212,7 @@ func (server *Server) AllUsers(w http.ResponseWriter, r *http.Request) {
 		if ps, err := strconv.Atoi(val); err == nil && ps > 0 {
 			pageSize = ps
 		} else {
-			server.badRequest(w, r, errors.New("invalid page_size"))
+			_ = server.badRequest(w, r, errors.New("invalid page_size"))
 			return
 		}
 	}
@@ -222,13 +221,13 @@ func (server *Server) AllUsers(w http.ResponseWriter, r *http.Request) {
 		if cp, err := strconv.Atoi(val); err == nil && cp > 0 {
 			currentPage = cp
 		} else {
-			server.badRequest(w, r, errors.New("invalid page"))
+			_ = server.badRequest(w, r, errors.New("invalid page"))
 			return
 		}
 	}
 	allUsers, lastPage, totalRecords, err := server.DB.GetAllUsersPaginated(pageSize, currentPage)
 	if err != nil {
-		server.badRequest(w, r, err)
+		_ = server.badRequest(w, r, err)
 		return
 	}
 
@@ -246,7 +245,7 @@ func (server *Server) AllUsers(w http.ResponseWriter, r *http.Request) {
 	resp.TotalRecords = totalRecords
 	resp.Users = allUsers
 
-	server.writeJSON(w, http.StatusOK, resp)
+	_ = server.writeJSON(w, http.StatusOK, resp)
 }
 
 // OneUser gets one user by id (from the url) and returns it as JSON
@@ -256,11 +255,11 @@ func (server *Server) OneUser(w http.ResponseWriter, r *http.Request) {
 
 	user, err := server.DB.GetOneUser(userID)
 	if err != nil {
-		server.badRequest(w, r, err)
+		_ = server.badRequest(w, r, err)
 		return
 	}
 
-	server.writeJSON(w, http.StatusOK, user)
+	_ = server.writeJSON(w, http.StatusOK, user)
 }
 
 func (server *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
@@ -268,17 +267,17 @@ func (server *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	err := server.readJSON(w, r, &user)
 	if err != nil {
-		server.badRequest(w, r, err)
+		_ = server.badRequest(w, r, err)
 		return
 	}
 	newHash, err := bcrypt.GenerateFromPassword([]byte(user.Password), 12)
 	if err != nil {
-		server.badRequest(w, r, err)
+		_ = server.badRequest(w, r, err)
 		return
 	}
 	err = server.DB.AddUser(user, string(newHash))
 	if err != nil {
-		server.badRequest(w, r, err)
+		_ = server.badRequest(w, r, err)
 		return
 	}
 
@@ -288,7 +287,7 @@ func (server *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp.Error = false
-	server.writeJSON(w, http.StatusOK, resp)
+	_ = server.writeJSON(w, http.StatusOK, resp)
 }
 
 // EditUser is the handler for adding or editing an existing user
@@ -300,39 +299,39 @@ func (server *Server) EditUser(w http.ResponseWriter, r *http.Request) {
 
 	err := server.readJSON(w, r, &user)
 	if err != nil {
-		server.badRequest(w, r, err)
+		_ = server.badRequest(w, r, err)
 		return
 	}
 
 	if userID > 0 {
 		err = server.DB.EditUser(user)
 		if err != nil {
-			server.badRequest(w, r, err)
+			_ = server.badRequest(w, r, err)
 			return
 		}
 
 		if user.Password != "" {
 			newHash, err := bcrypt.GenerateFromPassword([]byte(user.Password), 12)
 			if err != nil {
-				server.badRequest(w, r, err)
+				_ = server.badRequest(w, r, err)
 				return
 			}
 
 			err = server.DB.UpdatePasswordForUser(user, string(newHash))
 			if err != nil {
-				server.badRequest(w, r, err)
+				_ = server.badRequest(w, r, err)
 				return
 			}
 		}
 	} else {
 		newHash, err := bcrypt.GenerateFromPassword([]byte(user.Password), 12)
 		if err != nil {
-			server.badRequest(w, r, err)
+			_ = server.badRequest(w, r, err)
 			return
 		}
 		err = server.DB.AddUser(user, string(newHash))
 		if err != nil {
-			server.badRequest(w, r, err)
+			_ = server.badRequest(w, r, err)
 			return
 		}
 	}
@@ -343,7 +342,7 @@ func (server *Server) EditUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp.Error = false
-	server.writeJSON(w, http.StatusOK, resp)
+	_ = server.writeJSON(w, http.StatusOK, resp)
 }
 
 // DeleteUser deletes a user, and all associated tokens, from the database
@@ -353,7 +352,7 @@ func (server *Server) DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 	err := server.DB.DeleteUser(userID)
 	if err != nil {
-		server.badRequest(w, r, err)
+		_ = server.badRequest(w, r, err)
 		return
 	}
 
@@ -363,5 +362,5 @@ func (server *Server) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp.Error = false
-	server.writeJSON(w, http.StatusOK, resp)
+	_ = server.writeJSON(w, http.StatusOK, resp)
 }

@@ -64,7 +64,9 @@ func (server *Server) GetPaymentIntent(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		w.Write(out)
+		if _, err := w.Write(out); err != nil {
+			log.Error().Err(err).Msg("GetPaymentIntent write")
+		}
 	} else {
 		j := jsonResponse{
 			OK:      false,
@@ -78,7 +80,9 @@ func (server *Server) GetPaymentIntent(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		w.Write(out)
+		if _, err := w.Write(out); err != nil {
+			log.Error().Err(err).Msg("GetPaymentIntent write")
+		}
 	}
 }
 
@@ -203,7 +207,9 @@ func (server *Server) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, r 
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(out)
+	if _, err := w.Write(out); err != nil {
+		log.Error().Err(err).Msg("CreateCustomerAndSubscribeToPlan write")
+	}
 }
 
 // VirtualTerminalPaymentSucceeded displays a page with receipt information
@@ -224,7 +230,7 @@ func (server *Server) VirtualTerminalPaymentSucceeded(w http.ResponseWriter, r *
 
 	err := server.readJSON(w, r, &txnData)
 	if err != nil {
-		server.badRequest(w, r, err)
+		_ = server.badRequest(w, r, err)
 		return
 	}
 
@@ -235,13 +241,13 @@ func (server *Server) VirtualTerminalPaymentSucceeded(w http.ResponseWriter, r *
 
 	pi, err := card.RetrievePaymentIntent(txnData.PaymentIntent)
 	if err != nil {
-		server.badRequest(w, r, err)
+		_ = server.badRequest(w, r, err)
 		return
 	}
 
 	pm, err := card.GetPaymentMethod(txnData.PaymentMethod)
 	if err != nil {
-		server.badRequest(w, r, err)
+		_ = server.badRequest(w, r, err)
 		return
 	}
 
@@ -263,11 +269,11 @@ func (server *Server) VirtualTerminalPaymentSucceeded(w http.ResponseWriter, r *
 
 	_, err = server.SaveTransaction(txn)
 	if err != nil {
-		server.badRequest(w, r, err)
+		_ = server.badRequest(w, r, err)
 		return
 	}
 
-	server.writeJSON(w, http.StatusOK, txn)
+	_ = server.writeJSON(w, http.StatusOK, txn)
 }
 
 // RefundCharge accepts a json payload and tries to refund a charge
@@ -281,7 +287,7 @@ func (server *Server) RefundCharge(w http.ResponseWriter, r *http.Request) {
 
 	err := server.readJSON(w, r, &chargeToRefund)
 	if err != nil {
-		server.badRequest(w, r, err)
+		_ = server.badRequest(w, r, err)
 		return
 	}
 
@@ -293,14 +299,14 @@ func (server *Server) RefundCharge(w http.ResponseWriter, r *http.Request) {
 
 	err = card.Refund(chargeToRefund.PaymentIntent, chargeToRefund.Amount)
 	if err != nil {
-		server.badRequest(w, r, err)
+		_ = server.badRequest(w, r, err)
 		return
 	}
 
 	// update status in db
 	err = server.DB.UpdateOrderStatus(chargeToRefund.ID, 2)
 	if err != nil {
-		server.badRequest(w, r, errors.New("the charge was refunded, but the database could not be updated"))
+		_ = server.badRequest(w, r, errors.New("the charge was refunded, but the database could not be updated"))
 		return
 	}
 
@@ -311,7 +317,7 @@ func (server *Server) RefundCharge(w http.ResponseWriter, r *http.Request) {
 	resp.Error = false
 	resp.Message = "Charge refunded"
 
-	server.writeJSON(w, http.StatusOK, resp)
+	_ = server.writeJSON(w, http.StatusOK, resp)
 }
 
 // CancelSubscription is the handler to cancel a subscription
@@ -324,7 +330,7 @@ func (server *Server) CancelSubscription(w http.ResponseWriter, r *http.Request)
 
 	err := server.readJSON(w, r, &subToCancel)
 	if err != nil {
-		server.badRequest(w, r, err)
+		_ = server.badRequest(w, r, err)
 		return
 	}
 
@@ -336,14 +342,14 @@ func (server *Server) CancelSubscription(w http.ResponseWriter, r *http.Request)
 
 	err = card.CancelSubscription(subToCancel.PaymentIntent)
 	if err != nil {
-		server.badRequest(w, r, err)
+		_ = server.badRequest(w, r, err)
 		return
 	}
 
 	// update status in db
 	err = server.DB.UpdateOrderStatus(subToCancel.ID, 3)
 	if err != nil {
-		server.badRequest(w, r, errors.New("the subscription was cancelled, but the database could not be updated"))
+		_ = server.badRequest(w, r, errors.New("the subscription was cancelled, but the database could not be updated"))
 		return
 	}
 
@@ -354,5 +360,5 @@ func (server *Server) CancelSubscription(w http.ResponseWriter, r *http.Request)
 	resp.Error = false
 	resp.Message = "Subscription cancelled"
 
-	server.writeJSON(w, http.StatusOK, resp)
+	_ = server.writeJSON(w, http.StatusOK, resp)
 }
