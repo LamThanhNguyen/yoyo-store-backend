@@ -12,6 +12,12 @@ FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 WORKDIR /app
 COPY --from=builder /frontend ./
+COPY .env .
 COPY static ./static
+COPY start.sh .
+COPY wait-for.sh .
+RUN chmod +x /app/start.sh /app/wait-for.sh
+COPY db/migration ./db/migration
 
 CMD ["./frontend"]
+ENTRYPOINT ["/app/start.sh"]

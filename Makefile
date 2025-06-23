@@ -122,26 +122,37 @@ mock:
 	mockgen -package api -destination server_main/api/mock_interfaces_test.go github.com/LamThanhNguyen/yoyo-store-backend/server_main/api customerInserter,orderInserter,transactionInserter
 
 build_docker_back:
-	docker build -t yoyo-main -f server_main/Dockerfile .
+	docker build -t yoyo-main:local -f server_main/Dockerfile.local .
 
 build_docker_invoice:
-	docker build -t yoyo-invoice -f server_invoice/Dockerfile .
+	docker build -t yoyo-invoice:local -f server_invoice/Dockerfile.local .
 
 build_docker_front:
-	docker build -t yoyo-frontend -f frontend/Dockerfile .
+	docker build -t yoyo-frontend:local -f frontend/Dockerfile.local .
 
 build_docker: build_docker_back build_docker_invoice build_docker_front
 
 run_docker_back:
-	docker run --env-file .env -p 8080:8080 yoyo-main
+	docker run --rm --name backend-local \
+	--network yoyo-network \
+	-p 8080:8080 \
+	-e DB_SOURCE=postgresql://root:secret@postgres:5432/yoyo_store?sslmode=disable \
+	-e INVOICE_GRPC_ADDR=invoice-local:9090 \
+	yoyo-main:local
 
 run_docker_invoice:
-	docker run --env-file .env -p 9090:9090 -p 9091:9091 yoyo-invoice
+	docker run --rm --name invoice-local \
+	--network yoyo-network \
+	-p 9090:9090 -p 9091:9091 \
+	yoyo-invoice:local
 
 run_docker_front:
-	docker run --env-file .env -p 3000:3000 yoyo-frontend
-
-run_docker: run_docker_back run_docker_invoice run_docker_front
+	docker run --rm --name frontend-local \
+	--network yoyo-network \
+	-p 3000:3000 \
+	-e DB_SOURCE=postgresql://root:secret@postgres:5432/yoyo_store?sslmode=disable \
+	-e INVOICE_GRPC_ADDR=invoice-local:9090 \
+	yoyo-frontend:local
 
 .PHONY: network postgres createdb dropdb \
 	migrateup migrateup1 migratedown migratedown1 new_migration \

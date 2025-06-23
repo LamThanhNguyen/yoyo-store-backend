@@ -12,6 +12,7 @@ FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 WORKDIR /app
 COPY --from=builder /server_invoice ./
+COPY .env .
 COPY pdf-templates ./pdf-templates
 
 CMD ["./server_invoice"]
