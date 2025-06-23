@@ -121,4 +121,30 @@ mock:
 	mockgen -package pb -destination internal/pb/mock_invoice_service.go github.com/LamThanhNguyen/yoyo-store-backend/internal/pb InvoiceServiceClient
 	mockgen -package api -destination server_main/api/mock_interfaces_test.go github.com/LamThanhNguyen/yoyo-store-backend/server_main/api customerInserter,orderInserter,transactionInserter
 
-.PHONY: network postgres createdb dropdb migrateup migrateup1 migratedown migratedown1 new_migration build clean build_back build_invoice build_front start start_back start_invoice start_front stop stop_front stop_invoice stop_back proto mock test
+build_docker_back:
+	docker build -t yoyo-main -f server_main/Dockerfile .
+
+build_docker_invoice:
+	docker build -t yoyo-invoice -f server_invoice/Dockerfile .
+
+build_docker_front:
+	docker build -t yoyo-frontend -f frontend/Dockerfile .
+
+build_docker: build_docker_back build_docker_invoice build_docker_front
+
+run_docker_back:
+	docker run --env-file .env -p 8080:8080 yoyo-main
+
+run_docker_invoice:
+	docker run --env-file .env -p 9090:9090 -p 9091:9091 yoyo-invoice
+
+run_docker_front:
+	docker run --env-file .env -p 3000:3000 yoyo-frontend
+
+run_docker: run_docker_back run_docker_invoice run_docker_front
+
+.PHONY: network postgres createdb dropdb \
+	migrateup migrateup1 migratedown migratedown1 new_migration \
+	build clean build_back build_invoice build_front start start_back start_invoice start_front stop stop_front stop_invoice stop_back \
+	proto test mock \
+	build_docker_back build_docker_invoice build_docker_front build_docker run_docker_back run_docker_invoice run_docker_front run_docker
