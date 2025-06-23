@@ -1,0 +1,116 @@
+name: Run unit tests
+
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    branches: [develop]
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Go 1.24.x
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.x'
+        id: go
+
+      - name: Clean go build cache
+        run: |
+          chmod -R +w ~/.cache/go-build || true
+          chmod -R +w ~/go/pkg/mod || true
+          rm -rf ~/.cache/go-build
+          rm -rf ~/go/pkg/mod
+
+      - name: Cache go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Download Go modules
+        run: go mod download
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.64.8
+          args: --timeout=5m
+
+  test:
+    name: test
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: secret
+          POSTGRES_DB: yoyo_store
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Setup Go 1.24.x
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.x'
+        id: go
+
+      - name: Clean go build cache
+        run: |
+          chmod -R +w ~/.cache/go-build || true
+          chmod -R +w ~/go/pkg/mod || true
+          rm -rf ~/.cache/go-build
+          rm -rf ~/go/pkg/mod
+
+      - name: Cache go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Download Go modules
+        run: go mod download
+      
+      - name: Install golang-migrate
+        run: |
+          curl -L https://github.com/golang-migrate/migrate/releases/download/v4.18.3/migrate.linux-amd64.tar.gz | tar xvz
+          sudo mv migrate /usr/bin/migrate
+          which migrate
+
+      - name: Run migrations
+        run: make migrateup
+      
+      - name: Test
+        run: make test | tee test-report.txt
+        env:
+          DB_SOURCE: "postgresql://root:secret@localhost:5432/banking_system?sslmode=disable"
+      
+      - name: Upload test report
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: test-report.txt
