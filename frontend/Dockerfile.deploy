@@ -1,0 +1,22 @@
+FROM golang:1.24-alpine AS builder
+WORKDIR /src
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o /frontend ./frontend
+
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates
+WORKDIR /app
+COPY --from=builder /frontend ./
+COPY static ./static
+COPY start.sh .
+COPY wait-for.sh .
+RUN chmod +x /app/start.sh /app/wait-for.sh
+COPY db/migration ./db/migration
+
+CMD ["./frontend"]
+ENTRYPOINT ["/app/start.sh"]
