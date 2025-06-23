@@ -1,0 +1,59 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=yoyo_store
+    ports:
+      - "5432:5432"
+    volumes:
+      - data-volume:/var/lib/postgresql/data
+  server_main:
+    build:
+      context: .
+      dockerfile: server_main/Dockerfile.local
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_SOURCE=postgresql://root:secret@postgres:5432/yoyo_store?sslmode=disable
+      - INVOICE_GRPC_ADDR=server_invoice:9090
+    depends_on:
+      - postgres
+    entrypoint: 
+      [
+        "/app/wait-for.sh",
+        "postgres:5432",
+        "--",
+        "/app/start.sh"
+      ]
+    command: ["./server_main"]
+  server_invoice:
+    build:
+      context: .
+      dockerfile: server_invoice/Dockerfile.local
+    ports:
+      - "9090:9090"
+      - "9091:9091"
+    command: ["./server_invoice"]
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile.local
+    ports:
+      - "3000:3000"
+    environment:
+      - DB_SOURCE=postgresql://root:secret@postgres:5432/yoyo_store?sslmode=disable
+      - INVOICE_GRPC_ADDR=server_invoice:9090
+    depends_on:
+      - postgres
+    entrypoint: 
+      [
+        "/app/wait-for.sh",
+        "postgres:5432",
+        "--",
+        "/app/start.sh"
+      ]
+    command: ["./frontend"]
+volumes:
+  data-volume:

@@ -194,6 +194,13 @@ make run_docker_front
 make run_docker
 ```
 
+- **Docker Compose:**
+
+    ```bash
+    make run-compose-local
+    make stop-compose-local
+    ```
+
 - **Useful Docker commands:**
     ```bash
     docker ps

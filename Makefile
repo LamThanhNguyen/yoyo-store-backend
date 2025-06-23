@@ -154,6 +154,12 @@ run_docker_front:
 	-e INVOICE_GRPC_ADDR=invoice-local:9090 \
 	yoyo-frontend:local
 
+run-compose-local:
+	docker compose -f docker-compose-local.yaml up --build
+
+stop-compose-local:
+	docker compose -f docker-compose-local.yaml down
+
 .PHONY: network postgres createdb dropdb \
 	migrateup migrateup1 migratedown migratedown1 new_migration \
 	build clean build_back build_invoice build_front start start_back start_invoice start_front stop stop_front stop_invoice stop_back \
