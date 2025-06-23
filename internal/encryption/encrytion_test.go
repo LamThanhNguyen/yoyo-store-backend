@@ -20,3 +20,10 @@ func TestEncryptDecrypt(t *testing.T) {
 		t.Errorf("expected %s, got %s", original, plain)
 	}
 }
+
+func TestDecryptBadData(t *testing.T) {
+	e := Encryption{Key: []byte("0123456789abcdef0123456789abcdef")}
+	if _, err := e.Decrypt("bad-data"); err == nil {
+		t.Errorf("expected error for bad data")
+	}
+}
