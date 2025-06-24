@@ -28,9 +28,9 @@ spec:
             memory: "512Mi"
         ports:
         - containerPort: 9090
-          name: grpc-server-invoice
+          name: grpc-invoice
         - containerPort: 9091
-          name: http-server-invoice
+          name: http-invoice
         readinessProbe:
           httpGet:
             path: /invoice/v1/health
@@ -56,11 +56,11 @@ spec:
   selector:
     app: yoyo-store-server-invoice
   ports:
-  - name: grpc-server-invoice
+  - name: grpc-invoice
     port: 9090
-    targetPort: grpc-server-invoice
+    targetPort: grpc-invoice
     protocol: TCP
-  - name: http-server-invoice
+  - name: http-invoice
     port: 9091
-    targetPort: http-server-invoice
+    targetPort: http-invoice
     protocol: TCP

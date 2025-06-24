@@ -28,7 +28,7 @@ spec:
             memory: "512Mi"
         ports:
         - containerPort: 8080
-          name: http-server-main
+          name: http-main
         readinessProbe:
           httpGet:
             path: /api/v1/health
@@ -54,7 +54,7 @@ spec:
   selector:
     app: yoyo-store-server-main
   ports:
-  - name: http-server-main
+  - name: http-main
     port: 8080
-    targetPort: http-server-main
+    targetPort: http-main
     protocol: TCP
