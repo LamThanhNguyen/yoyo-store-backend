@@ -22,10 +22,17 @@ spec:
   rules:
   - http:
       paths:
-      - pathType: Prefix
-        path: /
+      - path: /
+        pathType: Prefix
         backend:
           service:
             name: yoyo-store-frontend-service
             port:
               number: 80
+      - path: /api/v1
+        pathType: Prefix
+        backend:
+          service:
+            name: yoyo-store-server-main-service
+            port:
+              number: 8080
