@@ -5,6 +5,7 @@ import (
 	"embed"
 	"fmt"
 	"html/template"
+	"strconv"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -56,7 +57,10 @@ func (server *Server) SendMail(
 	// send the mail
 	mail_server := mail.NewSMTPClient()
 	mail_server.Host = server.config.SmtpHost
-	mail_server.Port = server.config.SmtpPort
+	mail_server.Port, err = strconv.Atoi(server.config.SmtpPort)
+	if err != nil {
+		return err
+	}
 	mail_server.Username = server.config.SmtpUsername
 	mail_server.Password = server.config.SmtpPassword
 	mail_server.Encryption = mail.EncryptionTLS

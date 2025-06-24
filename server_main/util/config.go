@@ -23,7 +23,7 @@ type Config struct {
 	InvoiceGrpcAddr   string   `mapstructure:"INVOICE_GRPC_ADDR" json:"INVOICE_GRPC_ADDR"`
 	TokenSymmetricKey string   `mapstructure:"TOKEN_SYMMETRIC_KEY" json:"TOKEN_SYMMETRIC_KEY"`
 	SmtpHost          string   `mapstructure:"SMTP_HOST" json:"SMTP_HOST"`
-	SmtpPort          int      `mapstructure:"SMTP_PORT" json:"SMTP_PORT"`
+	SmtpPort          string   `mapstructure:"SMTP_PORT" json:"SMTP_PORT"`
 	SmtpUsername      string   `mapstructure:"SMTP_USERNAME" json:"SMTP_USERNAME"`
 	SmtpPassword      string   `mapstructure:"SMTP_PASSWORD" json:"SMTP_PASSWORD"`
 	FrontendAddr      string   `mapstructure:"FRONTEND_ADDR" json:"FRONTEND_ADDR"`
