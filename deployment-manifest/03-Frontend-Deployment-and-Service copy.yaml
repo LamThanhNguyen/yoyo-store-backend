@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: yoyo-store-server-main-deployment
+  name: yoyo-store-frontend-deployment
   labels:
-    app: yoyo-store-server-main
+    app: yoyo-store-frontend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: yoyo-store-server-main
+      app: yoyo-store-frontend
   template:
     metadata:
       labels:
-        app: yoyo-store-server-main
+        app: yoyo-store-frontend
     spec:
       serviceAccountName: yoyo-store-system-sa
       containers:
-      - name: yoyo-store-server-main
-        image: "${CONTAINER_IMAGE_YOYO_MAIN}"
+      - name: yoyo-store-frontend
+        image: "${CONTAINER_IMAGE_YOYO_FRONTEND}"
         imagePullPolicy: Always
         resources:
           requests:
@@ -27,18 +27,18 @@ spec:
             cpu: "1000m"
             memory: "512Mi"
         ports:
-        - containerPort: 8080
-          name: http-server-main
+        - containerPort: 3000
+          name: http-frontend
         readinessProbe:
           httpGet:
-            path: /api/v1/health
-            port: 8080
+            path: /health
+            port: 3000
           initialDelaySeconds: 3
           periodSeconds: 5
         livenessProbe:
           httpGet:
-            path: /api/v1/health
-            port: 8080
+            path: /health
+            port: 3000
           initialDelaySeconds: 10
           periodSeconds: 10
         env:
@@ -48,13 +48,15 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: yoyo-store-server-main-service
+  name: yoyo-store-frontend-service
+  #Important Note:  Need to add health check path annotations in service level if we are planning to use multiple targets in a load balancer
+  alb.ingress.kubernetes.io/healthcheck-path: /health
 spec:
   type: ClusterIP
   selector:
-    app: yoyo-store-server-main
+    app: yoyo-store-frontend
   ports:
-  - name: http-server-main
-    port: 8080
-    targetPort: http-server-main
+  - name: http-frontend
+    port: 80
+    targetPort: http-frontend
     protocol: TCP
