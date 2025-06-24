@@ -40,7 +40,7 @@ func (server *Server) SetupRouter() {
 		MaxAge:           300,
 	}))
 
-	mux.Get("/api/v1/health", server.handleHealthCheck)
+	mux.Get("/invoice/v1/health", server.handleHealthCheck)
 	// mux.Post("/invoice/create-and-send", server.CreateAndSendInvoice)
 
 	server.router = mux

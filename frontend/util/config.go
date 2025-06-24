@@ -52,7 +52,7 @@ func LoadConfig(ctx context.Context, path string) (Config, error) {
 
 	case "staging", "production":
 		// secretName := fmt.Sprintf("%s/banking-system", environment)
-		secretName := "banking-system"
+		secretName := "yoyo-store"
 		awsCfg, err := awsconfig.LoadDefaultConfig(ctx, awsconfig.WithRegion("ap-southeast-1"))
 		if err != nil {
 			return config, fmt.Errorf("unable to load AWS config: %w", err)

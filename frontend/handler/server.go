@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"encoding/json"
 	"html/template"
+	"maps"
 	"net/http"
 
 	"github.com/LamThanhNguyen/yoyo-store-backend/frontend/util"
@@ -66,10 +68,41 @@ func (server *Server) SetupRouter() {
 
 	fileServer := http.FileServer(http.Dir("./static"))
 	mux.Handle("/static/*", http.StripPrefix("/static", fileServer))
+	mux.Get("/health", server.handleHealthCheck)
 
 	server.router = mux
 }
 
 func (server *Server) Router() http.Handler {
 	return server.router
+}
+
+// writeJSON writes aribtrary data out as JSON
+func (server *Server) writeJSON(
+	w http.ResponseWriter,
+	status int,
+	data interface{},
+	headers ...http.Header,
+) error {
+	out, err := json.MarshalIndent(data, "", "\t")
+	if err != nil {
+		return err
+	}
+
+	if len(headers) > 0 {
+		maps.Copy(w.Header(), headers[0])
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	if _, err := w.Write(out); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (server *Server) handleHealthCheck(w http.ResponseWriter, r *http.Request) {
+	var data = map[string]string{"status": "ok"}
+	_ = server.writeJSON(w, http.StatusOK, data)
 }

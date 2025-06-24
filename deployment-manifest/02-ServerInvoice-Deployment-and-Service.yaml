@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: yoyo-store-server-invoice-deployment
+  labels:
+    app: yoyo-store-server-invoice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: yoyo-store-server-invoice
+  template:
+    metadata:
+      labels:
+        app: yoyo-store-server-invoice
+    spec:
+      serviceAccountName: yoyo-store-system-sa
+      containers:
+      - name: yoyo-store-server-invoice
+        image: "${CONTAINER_IMAGE_YOYO_INVOICE}"
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "256Mi"
+          limits:
+            cpu: "1000m"
+            memory: "512Mi"
+        ports:
+        - containerPort: 9090
+          name: grpc-server-invoice
+        - containerPort: 9091
+          name: http-server-invoice
+        readinessProbe:
+          httpGet:
+            path: /invoice/v1/health
+            port: 9091
+          initialDelaySeconds: 3
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /invoice/v1/health
+            port: 9091
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        env:
+          - name: ENVIRONMENT
+            value: "${ENVIRONMENT}"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: yoyo-store-server-invoice-service
+spec:
+  type: ClusterIP
+  selector:
+    app: yoyo-store-server-invoice
+  ports:
+  - name: grpc-server-invoice
+    port: 9090
+    targetPort: grpc-server-invoice
+    protocol: TCP
+  - name: http-server-invoice
+    port: 9091
+    targetPort: http-server-invoice
+    protocol: TCP

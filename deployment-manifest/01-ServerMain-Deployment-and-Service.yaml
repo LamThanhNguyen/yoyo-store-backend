@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: yoyo-store-server-main-deployment
+  labels:
+    app: yoyo-store-server-main
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: yoyo-store-server-main
+  template:
+    metadata:
+      labels:
+        app: yoyo-store-server-main
+    spec:
+      serviceAccountName: yoyo-store-system-sa
+      containers:
+      - name: yoyo-store-server-main
+        image: "${CONTAINER_IMAGE_YOYO_MAIN}"
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "256Mi"
+          limits:
+            cpu: "1000m"
+            memory: "512Mi"
+        ports:
+        - containerPort: 8080
+          name: http-server-main
+        env:
+          - name: ENVIRONMENT
+            value: "${ENVIRONMENT}"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: yoyo-store-server-main-service
+spec:
+  type: ClusterIP
+  selector:
+    app: yoyo-store-server-main
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: http-server-main
