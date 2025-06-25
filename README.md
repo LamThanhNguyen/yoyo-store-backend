@@ -17,8 +17,6 @@ It exposes REST APIs for the storefront and a gRPC service for invoice generatio
 
 A short demo is available in [`yoyo_store.mp4`](yoyo_store.mp4).
 
-<video src="yoyo_store.mp4" controls width="600"></video>
-
 ## Tech Stack
 
 - **Language:** Golang
