@@ -16,12 +16,8 @@ It exposes REST APIs for the storefront and a gRPC service for invoice generatio
 ## Demo
 
 A short demo is available in [`yoyo_store.mp4`](yoyo_store.mp4).
-<details>
-<summary>Watch a short demo</summary>
 
 <video src="yoyo_store.mp4" controls width="600"></video>
-
-</details>
 
 ## Tech Stack
 
