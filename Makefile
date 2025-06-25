@@ -164,4 +164,4 @@ stop-compose-local:
 	migrateup migrateup1 migratedown migratedown1 new_migration \
 	build clean build_back build_invoice build_front start start_back start_invoice start_front stop stop_front stop_invoice stop_back \
 	proto test mock \
-	build_docker_back build_docker_invoice build_docker_front build_docker run_docker_back run_docker_invoice run_docker_front run_docker
+	build_docker_back build_docker_invoice build_docker_front build_docker run_docker_back run_docker_invoice run_docker_front
